@@ -218,6 +218,11 @@ async function handler(request: Request, context: Context) {
     if (p[0] === 'workspaces' && p[1]) {
       const org = svc.uuid.parse(p[1]),
         feature = p[2];
+      if (feature === 'agent-connection' && method === 'GET') {
+        await authorize(actor, org, ['owner', 'admin']);
+        const { workspaceAgentConnection } = await import('@/server/workspace-agent');
+        return json(workspaceAgentConnection(org));
+      }
       if (feature === 'catalog' && method === 'GET') return json(await svc.catalog(actor, org));
       if (feature === 'plants' && method === 'GET')
         return json(

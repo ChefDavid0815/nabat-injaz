@@ -2,6 +2,18 @@
 
 Checked on 2026-10-03 on Windows, Node 22.23.1, Next.js 16.3.8 / React 19. The production project is `nabat-injaz`; the canonical HTTPS hostname is `nabat-injaz.vercel.app`. Vercel builds and Frankfurt functions use Node 22. No GitHub push was performed.
 
+## Workspace Agent update
+
+The Business integration now has 39 passing unit/integration tests, including six new Workspace Agent tests, plus the seven passing local browser tests. Tests cover job-specific read/write capabilities, configured-tenant isolation, uncertain trigger acceptance with an unchanged idempotency key/body, duplicate result saves, expiry/handover denial, approval suspension, completed runs missing a write, and provider rejection cooldown. They use mocked Workspace Agent HTTP responses and synthetic signals; they are not live GPT-6.1 Sol evidence.
+
+Deployment `dpl_EDTnttBwaqhvEH1DvckiuhtegwDh` is READY. The canonical MCP endpoint returns HTTP 200 and discovers both tools. Production plant detail and admin connection endpoints return 200, the adapter model is configured as `gpt-6.1-sol`, and the retained test observation remains queued with zero attempts (`workspace-agent-preflight.json`). `ANALYSIS_RUNTIME=external` deliberately keeps real dispatch disabled.
+
+The user's Edge management portal was verified in the “川云入海” workspace. Its credential creation form offers the exact **Workspace Agents API triggers** scope; no token was created. Its published-agent list is empty. The ChatGPT user-side `/agents` page is currently in the personal Free account and shows the eligible-plan notice, so agent creation still needs the Business user context. The private API channel, token, allowance policy, production dispatch migration and real read→analysis→write run remain pending. Do not treat the presence of an admin navigation entry as completed agent provisioning.
+
+The additive dispatch migration is implemented and exercised by the isolated local PostgreSQL-compatible integration databases. It has not been applied to production. Neon CLI authentication is unavailable; the required production-branch migration rehearsal is not claimed. The production detail query has a backwards-compatible path while that table is absent.
+
+The new owner connection panel and protected local setup form were inspected in the user's Edge browser. `view_image` was used on the existing dashboard concept and new rendered settings/setup screenshots in one comparison pass: green rail/ivory canvas, serif headings/utility type, white panels, control contrast, gutters and spacing remain consistent. New copy is limited to the requested integration setup and truthful unconfigured state. Desktop screenshots are 1699×926 and 1699×936 visible areas. Edge viewport emulation did not change the observed 1699px client width and one full-page capture timed out; the override was reset. No successful new mobile capture is claimed; the existing seven Playwright journeys separately passed mobile/RTL/reduced-motion checks.
+
 ## Functional evidence
 
 - Strict TypeScript and ESLint pass. 33 Vitest unit/integration tests pass, including tenant constraints, auth, idempotent care, transfers, token retirement, private media, analysis lifecycle/leases, history pagination, equal-weight fleet aggregation, plant/workspace-scoped job claims, PKCE/state/nonce/JWT verification, DPAPI credential round trip and chunked SSE completion checks.

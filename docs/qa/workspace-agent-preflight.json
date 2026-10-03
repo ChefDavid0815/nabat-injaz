@@ -1,0 +1,17 @@
+{
+  "mcpStatus": 200,
+  "mcpType": "text/event-stream",
+  "toolsDiscovered": 2,
+  "provider": "workspace-agent",
+  "plantStatus": 200,
+  "queuedJobs": [
+    {
+      "status": "queued",
+      "attempts": 0
+    }
+  ],
+  "connectionStatus": 200,
+  "configured": false,
+  "model": "gpt-6.1-sol",
+  "mcpUrl": "https://nabat-injaz.vercel.app/api/workspace-agent/mcp"
+}

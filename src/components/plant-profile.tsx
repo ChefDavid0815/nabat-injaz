@@ -230,13 +230,32 @@ export function PlantProfile({
             <div className="analysis-processing" role="status">
               <LoaderCircle className="spin" size={20} />
               <span>
-                {analysisProvider === 'chatgpt-subscription' &&
-                !data.jobs.some((j) => j.status === 'processing')
-                  ? 'Waiting for the connected analysis worker'
-                  : t('Analysis processing')}
+                {analysisProvider === 'workspace-agent' &&
+                data.jobs.some((j) => j.remote_status === 'suspended')
+                  ? 'The workspace agent is waiting for approval'
+                  : analysisProvider === 'workspace-agent' &&
+                      !data.jobs.some((j) => j.status === 'processing')
+                    ? 'Waiting for the connected workspace agent'
+                    : analysisProvider === 'chatgpt-subscription' &&
+                        !data.jobs.some((j) => j.status === 'processing')
+                      ? 'Waiting for the connected analysis worker'
+                      : t('Analysis processing')}
                 <small>The observation is saved. Health updates when analysis completes.</small>
               </span>
             </div>
+          )}
+          {analysisProvider === 'workspace-agent' && data.jobs.some((j) => j.conversation_url) && (
+            <p>
+              <a
+                className="text-link"
+                href={data.jobs.find((j) => j.conversation_url)?.conversation_url || ''}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open the workspace agent run
+                <ArrowRight size={16} />
+              </a>
+            </p>
           )}
           {data.jobs
             .filter((j) => j.status === 'failed')
@@ -261,9 +280,11 @@ export function PlantProfile({
           <div className="analysis-provenance">
             {analysisProvider === 'development'
               ? 'Development analysis · simulated signals, not a plant diagnosis.'
-              : analysisProvider === 'chatgpt-subscription'
-                ? 'GPT-6.1 Sol · Analysis requires your authorized local ChatGPT subscription worker.'
-                : 'Visual estimates support inspection; they are not a calibrated diagnosis.'}
+              : analysisProvider === 'workspace-agent'
+                ? 'Workspace Agent · Configured model: GPT-6.1 Sol. NABAT computes the score from saved visual estimates.'
+                : analysisProvider === 'chatgpt-subscription'
+                  ? 'GPT-6.1 Sol · Analysis requires your authorized local ChatGPT subscription worker.'
+                  : 'Visual estimates support inspection; they are not a calibrated diagnosis.'}
           </div>
         </div>
         <section className="panel profile-insight">

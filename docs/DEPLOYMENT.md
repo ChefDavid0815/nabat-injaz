@@ -4,7 +4,9 @@ The repository produces a Next.js standalone build. The NABAT Vercel project is 
 
 ## Vercel release
 
-Current user-required mode is `AI_PROVIDER=chatgpt-subscription` with `ANALYSIS_RUNTIME=external`. Vercel persists uploads/jobs; the user's authorized local worker uses their Business Premium plan and the exact GPT-6.1 Sol model. No Gateway or API-key fallback runs. See [subscription setup and eligibility](CHATGPT_SUBSCRIPTION.md). Connection, entitlement and live subscribed inference are only confirmed by the OAuth/model/observation checks recorded in the verification ledger.
+The selected Business integration is now the Workspace Agent adapter; see [setup](WORKSPACE_AGENT.md). Its MCP endpoint is deployed and verified. `AI_PROVIDER=workspace-agent` with `ANALYSIS_RUNTIME=external` keeps production in a truthful standby state until the published API channel, protected workspace token, intended allowance and dispatch schema are confirmed. Activation uses `ANALYSIS_RUNTIME=workspace-agent` and the scoped configuration, including `WORKSPACE_AGENT_BUDGET_CONFIRMED=true`. This route does not require an AI Platform API key or a running local analysis worker.
+
+The earlier experiment used `AI_PROVIDER=chatgpt-subscription` with `ANALYSIS_RUNTIME=external`. Its direct OAuth plan-sharing eligibility was not established for Business, and it is not the selected connection route. See [experimental subscription setup and eligibility](CHATGPT_SUBSCRIPTION.md).
 
 The Gateway configuration below describes the separately tested initial cloud adapter, retained as an optional implementation. It is not the user's selected billing path.
 

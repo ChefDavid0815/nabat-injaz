@@ -4,6 +4,8 @@
 
 A working V1 pilot repository for plant identity, longitudinal care and fleet operations. Next.js 16 / React 19 / strict TypeScript, one PostgreSQL schema, private photo storage, versioned vision and health services, NFC/QR provisioning and tenant-scoped access.
 
+Production uses the prepared **Business Workspace Agent** adapter with configured GPT-6.1 Sol, a job-scoped MCP read/write interface and no model API key. Tools are deployed; live dispatch remains disabled until the user's published API channel, workspace token, intended allowance and dispatch schema are verified. See [Workspace Agent setup](docs/WORKSPACE_AGENT.md). The earlier direct subscription OAuth experiment is not established as supported for Business.
+
 ## Run locally
 
 Node.js 22.23 or newer is recommended; the development environment was verified on Windows with Node 22.23.1. No database installation or AI credentials are needed for development.

@@ -121,10 +121,13 @@ export function SettingsView() {
           <p>
             {analysisProvider === 'development'
               ? 'Deterministic development simulation. No photo is sent to an external AI service.'
-              : 'OpenAI multimodal vision. Uploaded images are sent for structured analysis; response storage is disabled.'}
+              : analysisProvider === 'workspace-agent'
+                ? 'A connected ChatGPT Business Workspace Agent inspects observations. Its configured model is GPT-6.1 Sol. Conversation retention follows the workspace settings.'
+                : 'OpenAI multimodal vision. Uploaded images are sent for structured analysis; response storage is disabled.'}
           </p>
           <small>Configure provider credentials on the server. They never enter the browser.</small>
         </section>
+        {admin && analysisProvider === 'workspace-agent' && <AgentConnection />}
         <section className="panel">
           <h2>Your account</h2>
           <label>
@@ -193,6 +196,46 @@ export function SettingsView() {
         </Dialog>
       )}
     </>
+  );
+}
+function AgentConnection() {
+  const { workspace, toast } = useApp();
+  const { data, error } = useResource<{ configured: boolean; model: string; mcpUrl: string }>(
+    `/api/workspaces/${workspace.id}/agent-connection`,
+  );
+  return (
+    <section className="panel">
+      <h2>Workspace Agent connection</h2>
+      <ErrorMessage message={error} />
+      <p>
+        {data?.configured
+          ? 'This workspace is connected to its published analysis agent.'
+          : 'Observations wait until the published agent and its workspace access token are connected.'}
+      </p>
+      <label>
+        NABAT tools URL
+        <input readOnly value={data?.mcpUrl || ''} />
+      </label>
+      <button
+        className="button secondary"
+        disabled={!data}
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(data!.mcpUrl);
+            toast('NABAT tools URL copied.');
+          } catch {
+            toast('Copy the tools URL from the field.');
+          }
+        }}
+      >
+        <Copy size={16} />
+        Copy tools URL
+      </button>
+      <p className="helper">
+        Connect these tools in your Business workspace, select GPT-6.1 Sol, and publish the agent
+        with an API channel. Keep access tokens in the server’s encrypted configuration.
+      </p>
+    </section>
   );
 }
 function TransferList({ onAccept }: { onAccept: (t: Transfer) => void }) {

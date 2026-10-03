@@ -147,6 +147,11 @@ export async function getPlant(actor: Actor, id: string) {
 export async function plantDetails(actor: Actor, id: string) {
   const plant = await getPlant(actor, id),
     db = await database();
+  const agentSchema = (
+    await db.query<{ present: boolean }>(
+      "SELECT to_regclass('workspace_agent_dispatches') IS NOT NULL present",
+    )
+  ).rows[0].present;
   const [species, page, history, analyses, jobs] = await Promise.all([
     db.query<Species>('SELECT * FROM plant_species WHERE id=$1', [plant.species_id]),
     plantTimeline(plant),
@@ -158,8 +163,18 @@ export async function plantDetails(actor: Actor, id: string) {
       'SELECT id,provider,model,contract_version,features,comparison,created_at FROM visual_analyses WHERE plant_id=$1 AND organisation_id=$2 ORDER BY created_at DESC LIMIT 10',
       [id, plant.organisation_id],
     ),
-    db.query(
-      "SELECT id,status,attempts,error,photo_id FROM analysis_jobs WHERE plant_id=$1 AND organisation_id=$2 AND status IN ('queued','processing','failed') ORDER BY created_at DESC",
+    db.query<{
+      id: string;
+      status: string;
+      attempts: number;
+      error: string | null;
+      photo_id: string;
+      remote_status: string | null;
+      conversation_url: string | null;
+    }>(
+      agentSchema
+        ? "SELECT j.id,j.status,j.attempts,j.error,j.photo_id,d.remote_status,d.conversation_url FROM analysis_jobs j LEFT JOIN workspace_agent_dispatches d ON d.job_id=j.id AND d.active WHERE j.plant_id=$1 AND j.organisation_id=$2 AND j.status IN ('queued','processing','failed') ORDER BY j.created_at DESC"
+        : "SELECT id,status,attempts,error,photo_id,NULL::text remote_status,NULL::text conversation_url FROM analysis_jobs WHERE plant_id=$1 AND organisation_id=$2 AND status IN ('queued','processing','failed') ORDER BY created_at DESC",
       [id, plant.organisation_id],
     ),
   ]);

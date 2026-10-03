@@ -124,10 +124,14 @@ export async function runAnalysisBatch(
   deadlineAt = Infinity,
   organisationId?: string,
 ) {
+  if (process.env.AI_PROVIDER === 'workspace-agent') {
+    const { runWorkspaceAgentBatch } = await import('./workspace-agent');
+    return runWorkspaceAgentBatch(limit, plantId, deadlineAt);
+  }
   const db = await database();
   let count = 0;
   await db.query(
-    "UPDATE analysis_jobs SET status='failed',locked_at=null,error='Processing lease expired after the final attempt.' WHERE status='processing' AND attempts>=3 AND locked_at<now()-interval '5 minutes' AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2)",
+    "UPDATE analysis_jobs SET status='failed',locked_at=null,error='Processing lease expired after the final attempt.' WHERE status='processing' AND attempts>=3 AND locked_at<now()-interval '5 minutes' AND NOT EXISTS(SELECT 1 FROM workspace_agent_dispatches d WHERE d.job_id=analysis_jobs.id AND d.active) AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2)",
     [plantId || null, organisationId || null],
   );
   for (let i = 0; i < limit; i++) {
@@ -141,7 +145,7 @@ export async function runAnalysisBatch(
           organisation_id: string;
           attempts: number;
         }>(
-          `SELECT id,photo_id,plant_id,organisation_id,attempts FROM analysis_jobs WHERE attempts<3 AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2) AND (status='queued' AND available_at<=now() OR status='processing' AND locked_at<now()-interval '5 minutes') ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
+          `SELECT id,photo_id,plant_id,organisation_id,attempts FROM analysis_jobs WHERE attempts<3 AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2) AND (status='queued' AND available_at<=now() OR status='processing' AND locked_at<now()-interval '5 minutes' AND NOT EXISTS(SELECT 1 FROM workspace_agent_dispatches d WHERE d.job_id=analysis_jobs.id AND d.active)) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
           [plantId || null, organisationId || null],
         )
       ).rows[0];
