@@ -1,6 +1,6 @@
 # Business Workspace Agent integration
 
-Current selection: Business Workspace Agent with GPT-5.6 Luna. The private draft exists; live activation still requires the published API channel, connected observation tools and protected access token. Gateway tier routing is retained as an inactive alternative.
+Current selection: Business Workspace Agent with GPT-5.6 Luna. The private agent is created with an enabled API channel; live activation still requires connected observation tools and a protected access token. Gateway tier routing is retained as an inactive alternative.
 
 The user confirmed Workspace Agents is enabled and selected GPT-5.6 Luna. This adapter uses ChatGPT's Workspace Agents trigger API with a Workspace Agent access token, not a Platform API key. It has no alternative-model or paid-provider fallback. Actual billing/usage permissions must be checked in the Business workspace before enabling live dispatch.
 

@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-03T17:15:48.424Z",
+  "deployment": "dpl_FYnGCDg1kHUxYVmJznxpHdjZmAuj",
+  "health": 200,
+  "connectionStatus": 200,
+  "connection": {
+    "configured": false,
+    "model": "gpt-5.6-luna",
+    "mcpUrl": "https://nabat-injaz.vercel.app/api/workspace-agent/mcp"
+  },
+  "plantStatus": 200,
+  "jobs": [
+    {
+      "status": "queued",
+      "attempts": 0
+    }
+  ],
+  "analyses": 0,
+  "score": null,
+  "mcpStatus": 200,
+  "tools": ["get_observation_for_analysis", "submit_observation_analysis"]
+}
