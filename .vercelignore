@@ -1,0 +1,9 @@
+data/
+.git/
+docs/
+test-results/
+playwright-report/
+node_modules/
+.env*
+.agents
+*.tsbuildinfo

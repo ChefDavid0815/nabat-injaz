@@ -1,0 +1,9 @@
+{
+  "provider": "vercel-ai-gateway",
+  "model": "openai/gpt-4.1-mini",
+  "input": "AI-generated botanical asset; not a biological validation",
+  "durationMs": 5656,
+  "validSignals": true,
+  "analysisConfidence": 0.7,
+  "imageQuality": 0.95
+}

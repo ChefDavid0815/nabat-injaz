@@ -1,0 +1,16 @@
+{
+  "canonical": "https://nabat-injaz.vercel.app",
+  "publicNfcStatus": 200,
+  "privateFieldsHidden": true,
+  "unauthenticatedPlant": 401,
+  "sharedDemoDisabled": 404,
+  "signedMedia": 200,
+  "unsignedMedia": 403,
+  "tagSvgStatus": 200,
+  "tagSvgType": "image/svg+xml",
+  "cron": 200,
+  "inlineAnalyses": 0,
+  "queuedAttempts": 0,
+  "analysisProvider": "chatgpt-subscription",
+  "subscribedInference": "pending user OAuth and eligible model catalog"
+}
