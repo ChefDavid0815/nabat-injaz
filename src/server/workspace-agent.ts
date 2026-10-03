@@ -242,11 +242,26 @@ async function sendDispatch(d: Dispatch, token: string) {
       );
       return;
     }
+    const rejection = await response.json().catch(() => ({}));
+    const candidateCode = rejection.error?.code || rejection.error?.type || rejection.code;
+    const code =
+      typeof candidateCode === 'string' && /^[a-z0-9_:-]{1,80}$/i.test(candidateCode)
+        ? candidateCode
+        : null;
+    const rawReason = rejection.error?.message || rejection.message || rejection.detail;
+    const reason =
+      typeof rawReason === 'string'
+        ? rawReason
+            .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+            .replace(/https?:\/\/\S+/gi, '[link]')
+            .replace(/[A-Za-z0-9._-]{32,}/g, '[redacted]')
+            .slice(0, 140)
+        : '';
     await db.transaction((tx) =>
       fail(
         tx,
         d,
-        `Workspace Agent trigger was rejected (${response.status}). Check the agent's API channel and workspace token permissions.`,
+        `Workspace Agent trigger was rejected (${response.status}${code ? `; ${code}` : ''}). ${reason || "Check the agent's API channel and workspace token permissions."}`,
       ),
     );
     await db.query(

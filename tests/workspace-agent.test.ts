@@ -265,10 +265,32 @@ describe('Workspace Agent dispatch and job-scoped capabilities', () => {
   it('pauses new dispatches after a trigger authorization rejection', async () => {
     await observation();
     await observation();
-    const fetcher = vi.fn(async () => Response.json({ error: 'denied' }, { status: 403 }));
+    const leakedCapability = 'b'.repeat(43);
+    const fetcher = vi.fn(async () =>
+      Response.json(
+        {
+          error: {
+            code: 'api_trigger_denied',
+            message: `The agent is not runnable. Bearer test-secret-token ${leakedCapability}`,
+          },
+        },
+        { status: 403 },
+      ),
+    );
     vi.stubGlobal('fetch', fetcher);
     expect(await runAnalysisBatch(5)).toBe(1);
     expect(fetcher).toHaveBeenCalledTimes(1);
+    const error = (
+      await (
+        await database()
+      ).query<{ error: string }>(
+        "SELECT error FROM analysis_jobs WHERE status='failed' AND error LIKE '%api_trigger_denied%' LIMIT 1",
+      )
+    ).rows[0].error;
+    expect(error).toContain('api_trigger_denied');
+    expect(error).toContain('not runnable');
+    expect(error).not.toContain('test-secret-token');
+    expect(error).not.toContain(leakedCapability);
     expect(await runAnalysisBatch(5)).toBe(0);
     expect(fetcher).toHaveBeenCalledTimes(1);
   });
