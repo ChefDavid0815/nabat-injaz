@@ -213,7 +213,9 @@ async function sendDispatch(d: Dispatch, token: string) {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
         'Idempotency-Key': `nabat-${d.id}`,
-        'OpenAI-Beta': 'workspace_agent_runs=v1',
+        ...(process.env.WORKSPACE_AGENT_RUN_STATUS === 'off'
+          ? {}
+          : { 'OpenAI-Beta': 'workspace_agent_runs=v1' }),
       },
       signal: AbortSignal.timeout(20000),
       body: JSON.stringify({
