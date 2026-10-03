@@ -281,7 +281,7 @@ export function PlantProfile({
             {analysisProvider === 'development'
               ? 'Development analysis · simulated signals, not a plant diagnosis.'
               : analysisProvider === 'workspace-agent'
-                ? 'Workspace Agent · Configured model: GPT-6.1 Sol. NABAT computes the score from saved visual estimates.'
+                ? 'Workspace Agent · Configured model: GPT-5.6 Luna. NABAT computes the score from saved visual estimates.'
                 : analysisProvider === 'chatgpt-subscription'
                   ? 'GPT-6.1 Sol · Analysis requires your authorized local ChatGPT subscription worker.'
                   : 'Visual estimates support inspection; they are not a calibrated diagnosis.'}

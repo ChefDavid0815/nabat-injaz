@@ -101,7 +101,7 @@ describe('Workspace Agent dispatch and job-scoped capabilities', () => {
     vi.stubGlobal('fetch', fetcher);
     expect(await runAnalysisBatch(1)).toBe(1);
     const input = triggerInput(fetcher);
-    expect(input.requested_model).toBe('gpt-6.1-sol');
+    expect(input.requested_model).toBe('gpt-5.6-luna');
     expect(input.capability).toHaveLength(43);
     const jobs = (
       await (
@@ -152,7 +152,7 @@ describe('Workspace Agent dispatch and job-scoped capabilities', () => {
     expect(detail.history).toHaveLength(1);
     expect(detail.analyses[0]).toMatchObject({
       provider: 'chatgpt-workspace-agent',
-      model: 'gpt-6.1-sol',
+      model: 'gpt-5.6-luna',
     });
   });
   it('retries uncertain trigger acceptance with the same event key and capability', async () => {

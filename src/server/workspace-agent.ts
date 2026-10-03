@@ -12,7 +12,7 @@ import {
   PROMPT_VERSION,
 } from '@/domain/analysis/contract';
 
-const MODEL = 'gpt-6.1-sol';
+const MODEL = 'gpt-5.6-luna';
 const PROVIDER = 'chatgpt-workspace-agent';
 type Dispatch = {
   id: string;

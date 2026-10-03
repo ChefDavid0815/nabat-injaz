@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-10-03T16:00:38.697Z",
+  "models": [
+    {
+      "id": "openai/gpt-4.1-mini",
+      "pricing": {
+        "input": "0.0000004",
+        "output": "0.0000016",
+        "cachedInputTokens": "0.0000001",
+        "cacheCreationInputTokens": "0"
+      }
+    },
+    {
+      "id": "openai/gpt-6-astra",
+      "pricing": {
+        "input": "0.00001",
+        "output": "0.00005",
+        "cachedInputTokens": "0.000001",
+        "cacheCreationInputTokens": "0.0000125"
+      }
+    },
+    {
+      "id": "openai/gpt-6-luna",
+      "pricing": {
+        "input": "0.0000001",
+        "output": "0.0000005",
+        "cachedInputTokens": "0.00000001",
+        "cacheCreationInputTokens": "0.000000125"
+      }
+    },
+    {
+      "id": "openai/gpt-6.1-sol",
+      "pricing": {
+        "input": "0.000002",
+        "output": "0.00001",
+        "cachedInputTokens": "0.0000001",
+        "cacheCreationInputTokens": "0.0000025"
+      }
+    }
+  ],
+  "credits": {
+    "balance": "4.9980348",
+    "totalUsed": "0.0019652"
+  }
+}

@@ -11,6 +11,7 @@ import {
 } from '@/server/services';
 import { AppError } from '@/server/security';
 import { AppShell } from '@/components/app-shell';
+import { gatewayRoute } from '@/domain/analysis/routing';
 import { PlantProfile } from '@/components/plant-profile';
 import { Brand } from '@/components/brand';
 export const dynamic = 'force-dynamic';
@@ -51,6 +52,13 @@ export default async function TagPage({ params }: { params: Promise<{ token: str
           workspace={workspace}
           workspaces={all}
           analysisProvider={process.env.AI_PROVIDER || 'development'}
+          analysisModel={
+            process.env.AI_PROVIDER === 'gateway'
+              ? gatewayRoute(workspace.ai_tier).label
+              : process.env.AI_PROVIDER === 'workspace-agent'
+                ? 'GPT-5.6 Luna'
+                : ''
+          }
         >
           <PlantProfile
             initial={JSON.parse(JSON.stringify(initial))}

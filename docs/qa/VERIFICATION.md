@@ -1,5 +1,15 @@
 # NABAT V1 verification ledger
 
+## GPT-5.6 Luna Workspace Agent preparation, 2026-10-03
+
+The selected route is the user's Business Workspace Agent with GPT-5.6 Luna. The native builder lists GPT-5.6 Luna, but not GPT-6 Luna; the user confirmed the former. Its saved instructions and backend provenance now use `gpt-5.6-luna`. The draft has an API channel pending publication/activation.
+
+The Business usage page confirms Workspace Agents shares the plan allowance; extra shared credits are zero and auto top-up is off. Adding the NABAT MCP app requires ChatGPT developer mode. That security change and creation of a finite-lived Workspace Agents scoped access token require action-time confirmation before dispatch. No token or credit purchase was created. The pilot photograph remains queued without a fabricated score.
+
+Typecheck, lint, build and 44 tests passed. The five new Gateway tests verify server-owned Free defaults, trusted tier routing, usage persistence, budget denial before inference, terminal quota handling, cross-workspace reservation denial and compatibility with the optional Agent table absent. They use mocked outputs and are not subscribed or paid-model inference proof.
+
+Migrations 008 and 009 were rehearsed on a production branch, then applied through the production direct TLS connection. Plant/photo/analysis counts stayed 1/1/0; migration count moved from 7 to 9. The rehearsal branch auto-expires after one day. Gateway catalog checks are separate evidence; that adapter is inactive under the final Workspace Agent selection.
+
 Checked on 2026-10-03 on Windows, Node 22.23.1, Next.js 16.3.8 / React 19. The production project is `nabat-injaz`; the canonical HTTPS hostname is `nabat-injaz.vercel.app`. Vercel builds and Frankfurt functions use Node 22. No GitHub push was performed.
 
 ## Workspace Agent update

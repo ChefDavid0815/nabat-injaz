@@ -1,10 +1,12 @@
 # Business Workspace Agent integration
 
-The user confirmed Workspace Agents is enabled and GPT-6.1 Sol can be selected. This adapter uses ChatGPT's Workspace Agents trigger API with a Workspace Agent access token, not a Platform API key. It has no alternative-model or paid-provider fallback. Actual billing/usage permissions must be checked in the Business workspace before enabling live dispatch.
+Current selection: Business Workspace Agent with GPT-5.6 Luna. The private draft exists; live activation still requires the published API channel, connected observation tools and protected access token. Gateway tier routing is retained as an inactive alternative.
+
+The user confirmed Workspace Agents is enabled and selected GPT-5.6 Luna. This adapter uses ChatGPT's Workspace Agents trigger API with a Workspace Agent access token, not a Platform API key. It has no alternative-model or paid-provider fallback. Actual billing/usage permissions must be checked in the Business workspace before enabling live dispatch.
 
 ## Concrete setup
 
-1. Create a private agent named **NABAT Plant Observation Analyst** in the Business workspace. Select **GPT-6.1 Sol** in its builder. Do not enable model fallback. Keep extra-credit purchasing/consumption disabled according to the workspace's available controls; set a pilot usage limit.
+1. Create a private agent named **NABAT Plant Observation Analyst** in the Business workspace. Select **GPT-5.6 Luna** in its builder. Do not enable model fallback. Keep extra-credit purchasing/consumption disabled according to the workspace's available controls; set a pilot usage limit.
 2. Connect the NABAT MCP server at `https://nabat-injaz.vercel.app/api/workspace-agent/mcp`. It uses no persistent connector credential: each trigger grants a short-lived, one-observation capability passed in tool arguments. Tool discovery is public; private photos and writes require that capability. It exposes only `get_observation_for_analysis` and `submit_observation_analysis`.
 3. Use the instructions below. The agent must inspect the returned **image**, then submit the strict feature schema. NABAT, rather than the language model, computes longitudinal comparison, health scores and alerts. Configure the intended approval policy for this narrowly scoped write tool; if approval is required, the website shows a waiting state and a link to the agent run.
 4. Add an **API channel**, publish privately, and copy its `agtch_...` trigger ID. The user owning the trigger access token must be able to run this agent. Creating a trigger ID does not prove that the tools or writes work.
@@ -15,7 +17,7 @@ The user confirmed Workspace Agents is enabled and GPT-6.1 Sol can be selected. 
 ## Agent instructions
 
 ```text
-You are NABAT Plant Observation Analyst. Use the configured GPT-6.1 Sol model.
+You are NABAT Plant Observation Analyst. Use the configured GPT-5.6 Luna model.
 Your only task is to inspect one plant observation and save visible features.
 
 An API trigger provides JSON with job_id and a short-lived capability.
@@ -47,7 +49,7 @@ Each capability is derived using the application's signing secret, attempt UUID,
 
 Transport retries after uncertain acceptance reuse the **same** idempotency key, conversation key and capability. At most three sends are attempted. Provider authorization/admission failures pause further dispatches. Accepted runs are polled through authenticated profile requests or the existing secret cron; approval suspension remains visible. Missing/failed/expired results become failed jobs and require explicit retry rather than unbounded repeated model runs.
 
-Model provenance records the **published agent configuration** (`gpt-6.1-sol`), API channel, dispatch ID and available run ID. The trigger/status API does not attest the exact inference model; do not describe this metadata as cryptographic model proof. Verify the selected model in the agent builder and the real run.
+Model provenance records the **published agent configuration** (`gpt-5.6-luna`), API channel, dispatch ID and available run ID. The trigger/status API does not attest the exact inference model; do not describe this metadata as cryptographic model proof. Verify the selected model in the agent builder and the real run.
 
 The Workspace Agents API currently exposes trigger acceptance and beta run status, not the final response text. Result ingestion therefore uses the connected MCP write tool. Run retention and billing follow the Business workspace's controls; this adapter does not claim `store:false` for Workspace Agent conversations or change billing automatically.
 

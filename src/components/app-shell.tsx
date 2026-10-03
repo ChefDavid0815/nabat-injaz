@@ -38,6 +38,7 @@ interface AppContext {
   actor: Actor;
   workspace: Workspace;
   analysisProvider: string;
+  analysisModel: string;
   toast: (message: string) => void;
   openSearch: () => void;
 }
@@ -52,12 +53,14 @@ export function AppShell({
   workspace,
   workspaces,
   analysisProvider,
+  analysisModel,
   children,
 }: {
   actor: Actor;
   workspace: Workspace;
   workspaces: Workspace[];
   analysisProvider: string;
+  analysisModel: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname(),
@@ -112,6 +115,7 @@ export function AppShell({
         actor,
         workspace,
         analysisProvider,
+        analysisModel,
         toast: setMessage,
         openSearch: () => setSearch(true),
       }}

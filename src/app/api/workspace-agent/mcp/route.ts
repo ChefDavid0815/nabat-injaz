@@ -4,6 +4,8 @@ import { rateLimit } from '@/server/security';
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 async function handler(request: Request) {
+  if (process.env.AI_PROVIDER !== 'workspace-agent')
+    return Response.json({ error: 'This connection is inactive.' }, { status: 404 });
   const origin = request.headers.get('origin');
   if (origin && ![process.env.APP_URL, 'https://chatgpt.com'].includes(origin))
     return new Response('Origin not permitted.', { status: 403 });

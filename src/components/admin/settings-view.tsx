@@ -23,7 +23,7 @@ interface Audit {
   created_at: string;
 }
 export function SettingsView() {
-  const { workspace, actor, toast, analysisProvider } = useApp(),
+  const { workspace, actor, toast, analysisProvider, analysisModel } = useApp(),
     { t, locale } = useLocale(),
     router = useRouter(),
     admin = ['owner', 'admin'].includes(workspace.role);
@@ -98,7 +98,7 @@ export function SettingsView() {
         </section>
         <section className="panel plan-panel">
           <h2>{workspace.plan.charAt(0).toUpperCase() + workspace.plan.slice(1)} workspace</h2>
-          <p>V1 pilot access. No billing is connected.</p>
+          <p>V1 pilot access. Customer checkout is not yet connected.</p>
           <ul>
             <li>
               <Check size={16} />
@@ -122,9 +122,26 @@ export function SettingsView() {
             {analysisProvider === 'development'
               ? 'Deterministic development simulation. No photo is sent to an external AI service.'
               : analysisProvider === 'workspace-agent'
-                ? 'A connected ChatGPT Business Workspace Agent inspects observations. Its configured model is GPT-6.1 Sol. Conversation retention follows the workspace settings.'
-                : 'OpenAI multimodal vision. Uploaded images are sent for structured analysis; response storage is disabled.'}
+                ? 'A connected ChatGPT Business Workspace Agent inspects observations. Its configured model is GPT-5.6 Luna. Conversation retention follows the workspace settings.'
+                : analysisProvider === 'gateway'
+                  ? `Vercel AI Gateway · ${analysisModel}. Observations use your workspace's analysis allowance.`
+                  : 'OpenAI multimodal vision. Uploaded images are sent for structured analysis; response storage is disabled.'}
           </p>
+          {analysisProvider === 'gateway' && (
+            <>
+              <p>
+                Free pilot analysis uses the available Gateway credit allowance. A saved photo stays
+                in your history when an allowance is reached.
+              </p>
+              <ul>
+                <li>Free · GPT-4.1 Mini</li>
+                <li>Plus · GPT-6 Luna</li>
+                <li>Pro · GPT-6.1 Sol</li>
+                <li>Enterprise · GPT-6 Astra</li>
+              </ul>
+              <small>Paid analysis tiers are reserved for future plans.</small>
+            </>
+          )}
           <small>Configure provider credentials on the server. They never enter the browser.</small>
         </section>
         {admin && analysisProvider === 'workspace-agent' && <AgentConnection />}
@@ -232,7 +249,7 @@ function AgentConnection() {
         Copy tools URL
       </button>
       <p className="helper">
-        Connect these tools in your Business workspace, select GPT-6.1 Sol, and publish the agent
+        Connect these tools in your Business workspace, select GPT-5.6 Luna, and publish the agent
         with an API channel. Keep access tokens in the server’s encrypted configuration.
       </p>
     </section>

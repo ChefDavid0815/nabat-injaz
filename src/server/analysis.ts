@@ -5,6 +5,7 @@ import { visionProvider } from '@/domain/analysis/providers';
 import { CONTRACT_VERSION, PROMPT_VERSION } from '@/domain/analysis/contract';
 import { calculateHealth, warningRules, ENGINE_VERSION } from '@/domain/health/engine';
 import type { VisionFeatures } from '@/domain/types';
+import { reserveGeneration, saveGenerationUsage, finishGeneration } from './gateway-metering';
 
 export async function scorePlant(tx: SqlClient, plantId: string, analysisId: string) {
   const p = (
@@ -129,9 +130,18 @@ export async function runAnalysisBatch(
     return runWorkspaceAgentBatch(limit, plantId, deadlineAt);
   }
   const db = await database();
+  // Older deployments can run inline providers before the optional agent migration.
+  const agentSchema = (
+    await db.query<{ present: boolean }>(
+      "SELECT to_regclass('workspace_agent_dispatches') IS NOT NULL present",
+    )
+  ).rows[0].present;
+  const externalLeaseExclusion = agentSchema
+    ? ' AND NOT EXISTS(SELECT 1 FROM workspace_agent_dispatches d WHERE d.job_id=analysis_jobs.id AND d.active)'
+    : '';
   let count = 0;
   await db.query(
-    "UPDATE analysis_jobs SET status='failed',locked_at=null,error='Processing lease expired after the final attempt.' WHERE status='processing' AND attempts>=3 AND locked_at<now()-interval '5 minutes' AND NOT EXISTS(SELECT 1 FROM workspace_agent_dispatches d WHERE d.job_id=analysis_jobs.id AND d.active) AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2)",
+    `UPDATE analysis_jobs SET status='failed',locked_at=null,error='Processing lease expired after the final attempt.' WHERE status='processing' AND attempts>=3 AND locked_at<now()-interval '5 minutes'${externalLeaseExclusion} AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2)`,
     [plantId || null, organisationId || null],
   );
   for (let i = 0; i < limit; i++) {
@@ -145,7 +155,7 @@ export async function runAnalysisBatch(
           organisation_id: string;
           attempts: number;
         }>(
-          `SELECT id,photo_id,plant_id,organisation_id,attempts FROM analysis_jobs WHERE attempts<3 AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2) AND (status='queued' AND available_at<=now() OR status='processing' AND locked_at<now()-interval '5 minutes' AND NOT EXISTS(SELECT 1 FROM workspace_agent_dispatches d WHERE d.job_id=analysis_jobs.id AND d.active)) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
+          `SELECT id,photo_id,plant_id,organisation_id,attempts FROM analysis_jobs WHERE attempts<3 AND ($1::uuid IS NULL OR plant_id=$1) AND ($2::uuid IS NULL OR organisation_id=$2) AND (status='queued' AND available_at<=now() OR status='processing' AND locked_at<now()-interval '5 minutes'${externalLeaseExclusion}) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1`,
           [plantId || null, organisationId || null],
         )
       ).rows[0];
@@ -157,6 +167,7 @@ export async function runAnalysisBatch(
       return { ...row, attempts: row.attempts + 1 };
     });
     if (!job) break;
+    let generationId: string | undefined;
     try {
       const photo = (
         await db.query<{ object_key: string; mime_type: string; note: string }>(
@@ -164,13 +175,33 @@ export async function runAnalysisBatch(
           [job.photo_id],
         )
       ).rows[0];
-      const provider = visionProvider();
+      const reservation =
+        process.env.AI_PROVIDER === 'gateway'
+          ? await reserveGeneration(job.id, job.organisation_id)
+          : null;
+      generationId = reservation?.id;
+      const provider = visionProvider(
+        reservation
+          ? {
+              model: reservation.route.model,
+              tier: reservation.route.tier,
+              workspaceId: job.organisation_id,
+              onUsage: (usage) => saveGenerationUsage(reservation.id, usage),
+            }
+          : undefined,
+      );
       const features = await provider.analyse({
         image: await storage().get(photo.object_key),
         mimeType: photo.mime_type,
         note: photo.note,
       });
       await db.transaction(async (tx) => {
+        const plant = (
+          await tx.query<{ organisation_id: string }>(
+            'SELECT organisation_id FROM plants WHERE id=$1 FOR UPDATE',
+            [job.plant_id],
+          )
+        ).rows[0];
         const lease = (
           await tx.query<{ status: string; attempts: number }>(
             'SELECT status,attempts FROM analysis_jobs WHERE id=$1 FOR UPDATE',
@@ -178,12 +209,6 @@ export async function runAnalysisBatch(
           )
         ).rows[0];
         if (lease.status !== 'processing' || lease.attempts !== job.attempts) return;
-        const plant = (
-          await tx.query<{ organisation_id: string }>(
-            'SELECT organisation_id FROM plants WHERE id=$1 FOR UPDATE',
-            [job.plant_id],
-          )
-        ).rows[0];
         const id = randomUUID();
         await tx.query(
           'INSERT INTO visual_analyses(id,organisation_id,plant_id,photo_id,provider,model,contract_version,prompt_version,features,comparison) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
@@ -200,6 +225,9 @@ export async function runAnalysisBatch(
             JSON.stringify({
               strategy: 'same-provider, confirmed viewpoint, quality gate, >=6h interval',
               version: 'comparison/1.0',
+              ...(reservation
+                ? { aiTier: reservation.route.tier, generationId: reservation.id }
+                : {}),
             }),
           ],
         );
@@ -220,11 +248,13 @@ export async function runAnalysisBatch(
           [job.id],
         );
       });
+      if (generationId) await finishGeneration(generationId);
       count++;
       console.info(
         JSON.stringify({ event: 'analysis.completed', jobId: job.id, provider: provider.name }),
       );
     } catch (e) {
+      if (generationId) await finishGeneration(generationId, true);
       console.error(
         JSON.stringify({
           event: 'analysis.failed',

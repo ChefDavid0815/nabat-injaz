@@ -11,6 +11,7 @@ export interface Workspace {
   name: string;
   kind: 'personal' | 'business';
   plan: 'personal' | 'pro' | 'business';
+  ai_tier?: import('./analysis/routing').AiTier;
   timezone: string;
   role: Role;
 }
