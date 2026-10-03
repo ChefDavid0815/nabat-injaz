@@ -1,6 +1,6 @@
 # Gateway routing and accounting
 
-This adapter is currently inactive. The user selected a Business Workspace Agent with GPT-6 Luna. If explicitly activated later, its default model is `openai/gpt-4.1-mini` through Vercel AI Gateway. Authentication uses Vercel's runtime OIDC. Free means use of the team's limited Gateway credit allowance, not zero-priced or unlimited inference. The live catalog had no zero-priced model meeting both image-input and structured-output requirements on 2026-10-03.
+This adapter is currently inactive. The user selected a Business Workspace Agent with GPT-5.6 Luna. If explicitly activated later, its default model is `openai/gpt-4.1-mini` through Vercel AI Gateway. Authentication uses Vercel's runtime OIDC. Free means use of the team's limited Gateway credit allowance, not zero-priced or unlimited inference. The live catalog had no zero-priced model meeting both image-input and structured-output requirements on 2026-10-03.
 
 | Analysis tier | Reserved model | Pilot calls per UTC day |
 | ------------- | -------------- | ----------------------- |

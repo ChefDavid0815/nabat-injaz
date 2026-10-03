@@ -4,7 +4,7 @@ The repository produces a Next.js standalone build. The NABAT Vercel project is 
 
 ## Vercel release
 
-The selected production route is the Business Workspace Agent with GPT-5.6 Luna. `AI_PROVIDER=workspace-agent` and `ANALYSIS_RUNTIME=external` leave it in standby while tools/channel/token/allowance are prepared. Activation uses `ANALYSIS_RUNTIME=workspace-agent` and the scoped configuration described in [Workspace Agent setup](WORKSPACE_AGENT.md). Gateway and direct subscription inference are inactive. The MCP endpoint returns 404 when Workspace Agent mode is not selected.
+The selected production route is the Business Workspace Agent with GPT-5.6 Luna. `AI_PROVIDER=workspace-agent` and `ANALYSIS_RUNTIME=workspace-agent` use the scoped configuration in [Workspace Agent setup](WORKSPACE_AGENT.md). Its tools and credential are configured, but real trigger attempts currently return a provider-side HTTP 409 availability rejection. Native preview runs; unattended photo analysis is not yet proven. Gateway and direct subscription inference are inactive. The MCP endpoint returns 404 when Workspace Agent mode is not selected.
 
 The earlier experiment used `AI_PROVIDER=chatgpt-subscription` with `ANALYSIS_RUNTIME=external`. Its direct OAuth plan-sharing eligibility was not established for Business, and it is not the selected connection route. See [experimental subscription setup and eligibility](CHATGPT_SUBSCRIPTION.md).
 

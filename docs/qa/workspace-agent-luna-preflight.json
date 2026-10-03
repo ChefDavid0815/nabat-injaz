@@ -1,18 +1,19 @@
 {
-  "checkedAt": "2026-10-03T17:15:48.424Z",
-  "deployment": "dpl_FYnGCDg1kHUxYVmJznxpHdjZmAuj",
+  "checkedAt": "2026-10-03T18:46:26.407Z",
+  "deployment": "dpl_GEnJC1puf2oMhPuQPNkkAZwuFtS1",
   "health": 200,
   "connectionStatus": 200,
   "connection": {
-    "configured": false,
+    "configured": true,
+    "triggerError": "Workspace Agent trigger was rejected (409; invalid_request_error). The workspace agent trigger is not currently available.",
     "model": "gpt-5.6-luna",
     "mcpUrl": "https://nabat-injaz.vercel.app/api/workspace-agent/mcp"
   },
   "plantStatus": 200,
   "jobs": [
     {
-      "status": "queued",
-      "attempts": 0
+      "status": "failed",
+      "attempts": 1
     }
   ],
   "analyses": 0,

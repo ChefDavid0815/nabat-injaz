@@ -1,6 +1,8 @@
 # Business Workspace Agent integration
 
-Current selection: Business Workspace Agent with GPT-5.6 Luna. The private agent is created with an enabled API channel; live activation still requires connected observation tools and a protected access token. Gateway tier routing is retained as an inactive alternative.
+Current selection: Business Workspace Agent with GPT-5.6 Luna. The private agent, enabled API channel, two connected observation tools and encrypted server credential are configured. Developer mode and enforced CSP were enabled after the user's explicit oral authorization. The 30-day credential expires on 2026-11-02 and has only Workspace Agents scope. Gateway remains inactive.
+
+Current external limitation: native preview can run and list both tools, but both beta and standard trigger requests return HTTP 409, `invalid_request_error`, with "The workspace agent trigger is not currently available." No photograph has been analysed by this agent and no score is fabricated. `WORKSPACE_AGENT_RUN_STATUS=off` selects the standard documented trigger without optional beta run-status tracking. The website displays the safe latest rejection separately from credential configuration. Resolve provider trigger availability before claiming unattended analysis; do not purchase credits or switch providers implicitly.
 
 The user confirmed Workspace Agents is enabled and selected GPT-5.6 Luna. This adapter uses ChatGPT's Workspace Agents trigger API with a Workspace Agent access token, not a Platform API key. It has no alternative-model or paid-provider fallback. Actual billing/usage permissions must be checked in the Business workspace before enabling live dispatch.
 

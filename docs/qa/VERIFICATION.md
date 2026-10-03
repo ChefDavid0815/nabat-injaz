@@ -1,5 +1,17 @@
 # NABAT V1 verification ledger
 
+## Authorized Workspace Agent connection and external trigger limitation
+
+The user explicitly authorized developer mode, enforced CSP, the two NABAT observation tools and a 30-day Workspace Agents-only access token orally. Those steps are complete. The token is encrypted in the `nabat-injaz` server configuration, expires on 2026-11-02, and was never printed in chat, source or screenshots. The protected local configuration helper was used; neither purchased credits nor auto top-up were enabled.
+
+The private GPT-5.6 Luna agent has the connected NABAT Observation Tools app and an enabled API channel. Native preview runs and correctly lists `get_observation_for_analysis` and `submit_observation_analysis`; this is text/setup verification, not a plant-photo analysis. Its displayed operation policy remains asking before writes. No broader all-tools permission was enabled.
+
+Three controlled trigger attempts, including the documented standard path without the optional beta header, returned HTTP 409 / `invalid_request_error`: "The workspace agent trigger is not currently available." The channel and native agent controls were checked; no additional self-service API availability switch was found. The exact provider cause is not established, and the workspace's billing banner is not treated as proof of causation. Do not claim subscribed background inference or score persistence has passed. The retained photograph has no visual analysis or health score.
+
+Commits `925242a`, `36fb011` and `7239f76` add safe rejection diagnostics, an optional non-beta trigger, and separate configured credentials from observed trigger health. Provider error text removes credentials, long capability strings and URLs. The six Agent tests, typecheck/lint and isolated production builds passed; tests also ensure rejection details cannot cross workspace boundaries. Broader 1.1 Operations work is excluded from these production snapshots.
+
+Deployment `dpl_GEnJC1puf2oMhPuQPNkkAZwuFtS1` is READY on the canonical hostname. The owner connection endpoint now reports `configured:true`, the exact model and a safe trigger error. Settings displays that rejection; the plant job is failed with its photo preserved. Read the final machine-readable evidence in `workspace-agent-luna-preflight.json` and native preview screenshot. Automated analysis remains blocked by the observed external trigger availability response.
+
 ## GPT-5.6 Luna Workspace Agent preparation, 2026-10-03
 
 The selected route is the user's Business Workspace Agent with GPT-5.6 Luna. The native builder lists GPT-5.6 Luna, but not GPT-6 Luna; the user confirmed the former. Its saved instructions and backend provenance now use `gpt-5.6-luna`. The private agent is created (`agt_6ac124edffd48191944585ef4c56227f`) and its API channel is enabled (`agtch_6ac135fbe3d481918cdb9dc4c827ed7e`). It is not yet connected to the NABAT tools or server credential.
