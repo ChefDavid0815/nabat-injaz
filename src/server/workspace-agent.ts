@@ -60,10 +60,25 @@ function configuration() {
 export function workspaceAgentConfigured() {
   return !!configuration();
 }
-export function workspaceAgentConnection(organisationId: string) {
+export async function workspaceAgentConnection(organisationId: string) {
   const config = configuration();
+  const configured = config?.organisation === organisationId;
+  const last = configured
+    ? (
+        await (
+          await database()
+        ).query<{ status: string; error: string | null }>(
+          'SELECT j.status,j.error FROM workspace_agent_dispatches d JOIN analysis_jobs j ON j.id=d.job_id WHERE d.organisation_id=$1 AND d.active ORDER BY d.created_at DESC LIMIT 1',
+          [organisationId],
+        )
+      ).rows[0]
+    : undefined;
   return {
-    configured: config?.organisation === organisationId,
+    configured,
+    triggerError:
+      last?.status === 'failed' && last.error?.startsWith('Workspace Agent trigger was rejected')
+        ? last.error
+        : null,
     model: MODEL,
     mcpUrl: `${process.env.APP_URL || 'http://localhost:3000'}/api/workspace-agent/mcp`,
   };

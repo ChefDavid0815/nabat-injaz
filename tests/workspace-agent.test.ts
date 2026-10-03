@@ -6,7 +6,11 @@ import { database, migrate } from '../src/server/db';
 import * as services from '../src/server/services';
 import { uploadPhoto } from '../src/server/media';
 import { runAnalysisBatch } from '../src/server/analysis';
-import { agentObservation, agentCompleteObservation } from '../src/server/workspace-agent';
+import {
+  agentObservation,
+  agentCompleteObservation,
+  workspaceAgentConnection,
+} from '../src/server/workspace-agent';
 import { workspaceAgentMcp } from '../src/server/workspace-agent-mcp';
 import { DevelopmentVisionProvider } from '../src/domain/analysis/providers';
 import type { Actor, VisionFeatures } from '../src/domain/types';
@@ -291,6 +295,14 @@ describe('Workspace Agent dispatch and job-scoped capabilities', () => {
     expect(error).toContain('not runnable');
     expect(error).not.toContain('test-secret-token');
     expect(error).not.toContain(leakedCapability);
+    expect(await workspaceAgentConnection(org)).toMatchObject({
+      configured: true,
+      triggerError: error,
+    });
+    expect(await workspaceAgentConnection(otherOrg)).toMatchObject({
+      configured: false,
+      triggerError: null,
+    });
     expect(await runAnalysisBatch(5)).toBe(0);
     expect(fetcher).toHaveBeenCalledTimes(1);
   });

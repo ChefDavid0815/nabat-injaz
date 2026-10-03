@@ -217,18 +217,22 @@ export function SettingsView() {
 }
 function AgentConnection() {
   const { workspace, toast } = useApp();
-  const { data, error } = useResource<{ configured: boolean; model: string; mcpUrl: string }>(
-    `/api/workspaces/${workspace.id}/agent-connection`,
-  );
+  const { data, error } = useResource<{
+    configured: boolean;
+    model: string;
+    mcpUrl: string;
+    triggerError: string | null;
+  }>(`/api/workspaces/${workspace.id}/agent-connection`);
   return (
     <section className="panel">
       <h2>Workspace Agent connection</h2>
       <ErrorMessage message={error} />
       <p>
         {data?.configured
-          ? 'This workspace is connected to its published analysis agent.'
+          ? 'The agent channel and server credential are configured. Automatic analysis depends on the workspace trigger service.'
           : 'Observations wait until the published agent and its workspace access token are connected.'}
       </p>
+      <ErrorMessage message={data?.triggerError || null} />
       <label>
         NABAT tools URL
         <input readOnly value={data?.mcpUrl || ''} />
