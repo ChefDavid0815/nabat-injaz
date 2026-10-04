@@ -6,6 +6,13 @@ data/
 *.tsbuildinfo
 test-results/
 playwright-report/
+.tools/
+.next-operations/
+windows/**/bin/
+windows/**/obj/
+windows/artifacts/
+windows/.vs/
+docs/qa/operations/**/.state/
 
 .vercel
 .env*

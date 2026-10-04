@@ -25,7 +25,7 @@ export async function addMember(actor: Actor, org: string, raw: unknown) {
       .object({
         email: z.email().transform((v) => v.toLowerCase()),
         userId: uuid,
-        role: z.enum(['admin', 'manager', 'caretaker']),
+        role: z.enum(['admin', 'manager', 'caretaker', 'viewer']),
       })
       .parse(raw),
     db = await database();

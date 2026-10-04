@@ -1,0 +1,17 @@
+{
+  "checkedAt": "2026-10-04T11:31:02.370Z",
+  "origin": "https://nabat-injaz.vercel.app",
+  "contract": "operations/1.1",
+  "sharedAuthenticationService": true,
+  "nativeBearer": true,
+  "careReplayedExactlyOnce": true,
+  "maintenanceVisited": 1,
+  "taskCompleted": true,
+  "simulatedProgrammingAudit": true,
+  "publicResolver": 200,
+  "privateAnonymousDenied": 401,
+  "observationsUploaded": false,
+  "modelCalls": 0,
+  "physicalNfc": false,
+  "validationOrganisation": "7e6a9938-06c1-477b-b382-8b3c7fc33b94"
+}

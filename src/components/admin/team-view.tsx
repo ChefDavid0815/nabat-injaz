@@ -112,6 +112,7 @@ export function TeamView() {
                 <option value="caretaker">{t('Caretaker')}</option>
                 <option value="manager">{t('Manager')}</option>
                 <option value="admin">{t('Admin')}</option>
+                <option value="viewer">{t('Viewer')}</option>
               </select>
             </label>
             <ErrorMessage message={error} />

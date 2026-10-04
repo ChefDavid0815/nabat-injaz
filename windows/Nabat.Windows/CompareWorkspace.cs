@@ -1,0 +1,58 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Shapes;
+using Nabat.Core;
+using System.Text.Json;
+using System.Runtime.InteropServices.WindowsRuntime;
+namespace Nabat.Windows;
+
+public sealed class CompareWindow : Window
+{
+    private readonly Grid _root = new() { Padding = new(24), RowSpacing = 16, Background = NativeUi.Brush("#F7F6EF") };
+    public CompareWindow(PlantSummary plant, JsonElement details, Uri server, ApiClient? api = null, string? org = null)
+    {
+        Title = plant.Name + " · AI Compare"; AppWindow.Resize(new global::Windows.Graphics.SizeInt32(1400, 950)); SystemBackdrop = new MicaBackdrop();
+        var observations = details.GetProperty("timeline").EnumerateArray().Where(o => o.GetProperty("type").GetString() == "observation" && o.TryGetProperty("image", out _)).Select(o => o.Clone()).OrderBy(o => o.GetProperty("at").GetDateTimeOffset()).ToList();
+        if (observations.Count < 2) { Content = NativeUi.Panel(NativeUi.Stack(NativeUi.Text("AI Compare Workspace", 30, true), NativeUi.Caption("Save two photo observations to establish visual comparison."))); return; }
+        var dates = observations.Select(o => NativeUi.Date(o.GetProperty("at").GetDateTimeOffset(), format: "dd MMM yyyy HH:mm")).ToList();
+        var before = new ComboBox { Header = "Before", ItemsSource = dates, SelectedIndex = 0, MinWidth = 200 }; var after = new ComboBox { Header = "After", ItemsSource = dates, SelectedIndex = dates.Count - 1, MinWidth = 200 }; var mode = new ComboBox { Header = "View", ItemsSource = new[] { "Side by side", "Before / after slider", "Pixel difference" }, SelectedIndex = 0, MinWidth = 180 }; var regions = new CheckBox { Content = "Evidence regions", IsEnabled = false };
+        var first = new Image { Width = 520, Height = 430, Stretch = Stretch.Uniform }; var second = new Image { Width = 520, Height = 430, Stretch = Stretch.Uniform }; var left = new ScrollViewer { Content = first, ZoomMode = ZoomMode.Enabled, MinZoomFactor = 1, MaxZoomFactor = 6, HorizontalScrollMode = ScrollMode.Enabled }; var right = new ScrollViewer { Content = second, ZoomMode = ZoomMode.Enabled, MinZoomFactor = 1, MaxZoomFactor = 6, HorizontalScrollMode = ScrollMode.Enabled }; bool linked = false;
+        void Link(ScrollViewer a, ScrollViewer b) { if (linked || Math.Abs(a.ZoomFactor - b.ZoomFactor) < .001 && Math.Abs(a.HorizontalOffset - b.HorizontalOffset) < .1 && Math.Abs(a.VerticalOffset - b.VerticalOffset) < .1) return; linked = true; b.ChangeView(a.HorizontalOffset, a.VerticalOffset, a.ZoomFactor, true); linked = false; }
+        left.ViewChanged += (_, _) => Link(left, right); right.ViewChanged += (_, _) => Link(right, left);
+        var pair = new Grid { ColumnSpacing = 16 }; pair.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) }); pair.ColumnDefinitions.Add(new() { Width = new(1, GridUnitType.Star) }); pair.Children.Add(left); Grid.SetColumn(right, 1); pair.Children.Add(right);
+        var baseImage = new Image { Width = 1040, Height = 430, Stretch = Stretch.Uniform }; var overlayImage = new Image { Width = 1040, Height = 430, Stretch = Stretch.Uniform }; var overlay = new Canvas { Width = 1040, Height = 430, IsHitTestVisible = false }; var composite = new Grid { Width = 1040, Height = 430, Children = { baseImage, overlayImage, overlay } }; var compositeView = new ScrollViewer { Content = composite, ZoomMode = ZoomMode.Enabled, MinZoomFactor = 1, MaxZoomFactor = 6, HorizontalScrollMode = ScrollMode.Enabled, Visibility = Visibility.Collapsed };
+        var slider = new Slider { Minimum = 0, Maximum = 100, Value = 50, Header = "Reveal after image", Visibility = Visibility.Collapsed }; var evidence = NativeUi.Stack(); var message = NativeUi.Caption("Provider signal estimates accompany saved visual evidence."); int generation = 0; JsonElement? selectedAfter = null; ImageSource? heatmap = null; double imageWidth = 1000, imageHeight = 430;
+        void DrawRegions() { overlay.Children.Clear(); if (regions.IsChecked != true || selectedAfter is null || !selectedAfter.Value.TryGetProperty("evidence_regions", out var boxes)) return; foreach (var box in boxes.EnumerateArray()) { var fit = PixelCompare.Fit(imageWidth, imageHeight, 1040, 430); var rect = new Rectangle { Width = box.GetProperty("width").GetDouble() * fit.Width, Height = box.GetProperty("height").GetDouble() * fit.Height, Stroke = NativeUi.Brush("#AD571D"), StrokeThickness = 2 }; Canvas.SetLeft(rect, fit.X + box.GetProperty("x").GetDouble() * fit.Width); Canvas.SetTop(rect, fit.Y + box.GetProperty("y").GetDouble() * fit.Height); overlay.Children.Add(rect); } }
+        void View() { var type = mode.SelectedIndex; pair.Visibility = type == 0 ? Visibility.Visible : Visibility.Collapsed; compositeView.Visibility = type == 0 ? Visibility.Collapsed : Visibility.Visible; slider.Visibility = type == 1 ? Visibility.Visible : Visibility.Collapsed; baseImage.Source = first.Source; overlayImage.Source = type == 2 ? heatmap : second.Source; overlayImage.Clip = type == 1 ? new RectangleGeometry { Rect = new global::Windows.Foundation.Rect(0, 0, 1040 * slider.Value / 100, 430) } : null; DrawRegions(); }
+        async Task Update()
+        {
+            var version = ++generation; var old = observations[before.SelectedIndex]; var current = observations[after.SelectedIndex]; try
+            {
+                JsonElement? f1 = old.TryGetProperty("features", out var a) ? a.Clone() : null; JsonElement? f2 = current.TryGetProperty("features", out var b) ? b.Clone() : null; var beforeUrl = old.GetProperty("image").GetString(); var afterUrl = current.GetProperty("image").GetString(); bool comparable = true;
+                if (api is not null && org is not null) { using var source = JsonDocument.Parse(await api.GetAsync($"{org}/plants/{plant.Id}/compare?before={old.GetProperty("id")}&after={current.GetProperty("id")}")); if (version != generation) return; var comparison = source.RootElement; imageWidth = comparison.GetProperty("after").GetProperty("width").GetDouble(); imageHeight = comparison.GetProperty("after").GetProperty("height").GetDouble(); beforeUrl = comparison.GetProperty("before").GetProperty("image").GetString(); afterUrl = comparison.GetProperty("after").GetProperty("image").GetString(); comparable = comparison.GetProperty("comparable").GetBoolean(); message.Text = comparison.GetProperty("reason").GetString() ?? "Comparable provider, lighting and viewpoint. Estimates are not calibrated measurements."; var one = comparison.GetProperty("before").GetProperty("features"); var two = comparison.GetProperty("after").GetProperty("features"); f1 = one.ValueKind == JsonValueKind.Object ? one.Clone() : null; f2 = two.ValueKind == JsonValueKind.Object ? two.Clone() : null; }
+                var image1 = new BitmapImage(NativeUi.ImageUri(beforeUrl, server)!) { DecodePixelWidth = 1600 }; var image2 = new BitmapImage(NativeUi.ImageUri(afterUrl, server)!) { DecodePixelWidth = 1600 }; if (version != generation) return; first.Source = image1; second.Source = image2; selectedAfter = f2; evidence.Children.Clear();
+                if (comparable && f1.HasValue && f2.HasValue) foreach (var signal in ObservationCompare.Calculate(f1.Value, f2.Value)) evidence.Children.Add(NativeUi.Stack(NativeUi.Text($"{signal.Label} {signal.PercentagePoints:+0.0;-0.0;0.0} signal points · confidence {signal.Confidence:P0}"), NativeUi.Caption(signal.AfterEvidence)));
+                regions.IsEnabled = f2.HasValue && f2.Value.TryGetProperty("evidence_regions", out _); if (!regions.IsEnabled) regions.IsChecked = false; evidence.Children.Add(NativeUi.Caption("Before: " + old.GetProperty("note").GetString())); evidence.Children.Add(NativeUi.Caption("After: " + current.GetProperty("note").GetString())); heatmap = null;
+                if (mode.SelectedIndex == 2) { var bytes1 = await ImageBytes(beforeUrl!, server); var bytes2 = await ImageBytes(afterUrl!, server); var p1 = await Pixels(bytes1, 1000, 430); var p2 = await Pixels(bytes2, 1000, 430); var pixels = await Task.Run(() => PixelCompare.Heatmap(p1, p2)); if (version != generation) return; var bitmap = new WriteableBitmap(1000, 430); using (var stream = bitmap.PixelBuffer.AsStream()) stream.Write(pixels); bitmap.Invalidate(); heatmap = bitmap; message.Text = "Pixel differences also include lighting, viewpoint and compression. They are not a biological damage mask."; }
+                if (version == generation) View();
+            }
+            catch (Exception ex) { message.Text = ex.Message; }
+        }
+        before.SelectionChanged += async (_, _) => await Update(); after.SelectionChanged += async (_, _) => await Update(); mode.SelectionChanged += async (_, _) => await Update(); slider.ValueChanged += (_, _) => View(); regions.Checked += (_, _) => View(); regions.Unchecked += (_, _) => View();
+        var controls = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 }; controls.Children.Add(before); controls.Children.Add(after); controls.Children.Add(mode); controls.Children.Add(regions);
+        var content = NativeUi.Stack(NativeUi.Text("AI Compare Workspace", 32, true), NativeUi.Caption(plant.Name + " · " + plant.Code), controls, message, pair, compositeView, slider, NativeUi.Caption("Ctrl+wheel to zoom. Panning and zoom remain linked."), evidence); _root.Children.Add(new ScrollViewer { Content = content }); Content = _root; NativeUi.PrepareWindow(this, _root); _root.Loaded += async (_, _) => await Update();
+    }
+    private static async Task<byte[]> ImageBytes(string source, Uri server) { var uri = NativeUi.ImageUri(source, server)!; if (uri.IsFile) return await File.ReadAllBytesAsync(uri.LocalPath); if (uri.Authority != server.Authority) throw new InvalidDataException("Image server is outside the configured NABAT origin."); using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }); return await client.GetByteArrayAsync(uri); }
+    private static async Task<byte[]> Pixels(byte[] bytes, uint width, uint height)
+    {
+        using var stream = new global::Windows.Storage.Streams.InMemoryRandomAccessStream();
+        using (var writer = new global::Windows.Storage.Streams.DataWriter(stream)) { writer.WriteBytes(bytes); await writer.StoreAsync(); writer.DetachStream(); }
+        stream.Seek(0); var decoder = await global::Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(stream);
+        var fit = PixelCompare.Fit(decoder.PixelWidth, decoder.PixelHeight, width, height); var w = (uint)Math.Max(1, Math.Round(fit.Width)); var h = (uint)Math.Max(1, Math.Round(fit.Height));
+        var data = await decoder.GetPixelDataAsync(global::Windows.Graphics.Imaging.BitmapPixelFormat.Rgba8, global::Windows.Graphics.Imaging.BitmapAlphaMode.Straight, new global::Windows.Graphics.Imaging.BitmapTransform { ScaledWidth = w, ScaledHeight = h }, global::Windows.Graphics.Imaging.ExifOrientationMode.RespectExifOrientation, global::Windows.Graphics.Imaging.ColorManagementMode.ColorManageToSRgb);
+        var pixels = data.DetachPixelData(); var canvas = new byte[width * height * 4]; Array.Fill(canvas, (byte)255); var x = (int)Math.Round(fit.X); var y = (int)Math.Round(fit.Y);
+        for (var row = 0; row < h; row++) Array.Copy(pixels, row * (int)w * 4, canvas, ((row + y) * (int)width + x) * 4, (int)w * 4); return canvas;
+    }
+}

@@ -58,12 +58,12 @@ test.describe.serial('first pilot plant lifecycle', () => {
       await expect(page.getByRole('heading', { name: locationName, exact: true })).toBeVisible();
     }
   });
-  test('NFC route, one-tap care and optional details survive reload', async ({ page }) => {
+  test('NFC route, one-tap care and optional details survive reload', async ({ page, baseURL }) => {
     await page
       .context()
       .addCookies(JSON.parse(await fs.readFile('test-results/pilot-state.json', 'utf8')).cookies);
     const alternate = await page.request.post('/api/workspaces', {
-      headers: { Origin: 'http://localhost:3000' },
+      headers: { Origin: new URL(baseURL!).origin },
       data: { name: 'Other test workspace', kind: 'personal' },
     });
     expect(alternate.status()).toBe(201);

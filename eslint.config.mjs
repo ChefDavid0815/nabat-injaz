@@ -6,6 +6,11 @@ import a11y from 'eslint-plugin-jsx-a11y';
 export default defineConfig([
   globalIgnores([
     '.next/**',
+    '.next-operations/**',
+    '.tools/**',
+    'windows/**/bin/**',
+    'windows/**/obj/**',
+    'windows/artifacts/**',
     'node_modules/**',
     'data/**',
     'playwright-report/**',

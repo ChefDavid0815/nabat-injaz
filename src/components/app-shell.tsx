@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Globe,
   X,
+  CalendarCheck,
 } from 'lucide-react';
 import { Brand } from './brand';
 import { Dialog, ErrorMessage, PlantImage } from './ui';
@@ -26,6 +27,7 @@ import { api, mutate } from '@/lib/client';
 import type { Actor, Workspace, Plant } from '@/domain/types';
 const nav = [
   ['Dashboard', '/app', House],
+  ['Today', '/app/today', CalendarCheck],
   ['Plants', '/app/plants', Leaf],
   ['Locations', '/app/locations', MapPin],
   ['Alerts', '/app/alerts', Bell],
@@ -208,7 +210,9 @@ export function AppShell({
           {[
             ['Home', '/app', House],
             ['Plants', '/app/plants', Leaf],
-            ['Add', '/app/plants/new', Plus],
+            workspace.kind === 'business'
+              ? ['Today', '/app/today', CalendarCheck]
+              : ['Add', '/app/plants/new', Plus],
             ['Alerts', '/app/alerts', Bell],
             ['Account', '/app/settings', Users],
           ].map(([label, href, Icon]) => {

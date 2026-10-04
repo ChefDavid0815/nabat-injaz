@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { database } from '@/server/db';
-import { authorize, AppError } from '@/server/security';
+import { authorize, AppError, careRoles } from '@/server/security';
 import type { Actor, Alert } from '@/domain/types';
 import { uuid } from '@/domain/contracts';
 import { audit } from '@/domain/audit/service';
@@ -30,7 +30,7 @@ export async function updateAlert(actor: Actor, id: string, status: string) {
       )
     ).rows[0];
     if (!a) throw new AppError(404, 'Alert not found.');
-    await authorize(actor, a.organisation_id, undefined, tx);
+    await authorize(actor, a.organisation_id, careRoles, tx);
     if (a.status === 'resolved') throw new AppError(409, 'This alert is already resolved.');
     await tx.query('UPDATE alerts SET status=$2,updated_at=now() WHERE id=$1', [id, status]);
     await tx.query(

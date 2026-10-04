@@ -1,0 +1,1689 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NABAT Operations",
+    "version": "1.1.0",
+    "description": "Contract operations/1.1. Domain services remain authoritative. Request schemas are generated from runtime Zod schemas; omitted optional mutation schemas and response DTOs are described in docs/OPERATIONS.md. Binary upload limit 4 MiB. JSON input limit 64,000 bytes."
+  },
+  "servers": [{ "url": "/api/v1/operations" }],
+  "paths": {
+    "/session": {
+      "get": {
+        "summary": "Current authenticated identity",
+        "parameters": [],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Sign in with an existing NABAT account",
+        "parameters": [],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "delete": {
+        "summary": "Revoke current session",
+        "parameters": [],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/workspaces": {
+      "post": {
+        "summary": "Create a workspace",
+        "parameters": [],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/identity/{code}": {
+      "get": {
+        "summary": "Resolve a plant code within account memberships",
+        "parameters": [
+          { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/snapshot": {
+      "get": {
+        "summary": "Workspace operational snapshot",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/fleet": {
+      "get": {
+        "summary": "Paginated, server sorted fleet",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/care": {
+      "post": {
+        "summary": "Append captured care exactly once",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Care" } } }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/care-receipts/{key}": {
+      "get": {
+        "summary": "Read actor-owned care receipt",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tasks": {
+      "get": {
+        "summary": "Today work in workspace timezone",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Schedule work",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateTask" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tasks/{id}": {
+      "post": {
+        "summary": "Update work using expected revision",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateTask" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/sessions": {
+      "get": {
+        "summary": "Maintenance history",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Start scoped maintenance",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/StartSession" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/sessions/{id}": {
+      "get": {
+        "summary": "Maintenance detail",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/sessions/{id}/finish": {
+      "post": {
+        "summary": "Complete or cancel maintenance",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/FinishSession" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/bulk": {
+      "post": {
+        "summary": "Atomic assign or move",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/BulkFleet" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/bulk-work": {
+      "post": {
+        "summary": "Atomic schedule, inspect or label",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/alerts/{id}": {
+      "post": {
+        "summary": "Transition alert lifecycle",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AlertTransition" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/queue/reconcile": {
+      "post": {
+        "summary": "Materialise and reconcile due work",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/plants/{id}": {
+      "get": {
+        "summary": "Plant history and observations",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/plants": {
+      "post": {
+        "summary": "Create stable plant identity",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/plants/{id}/score": {
+      "get": {
+        "summary": "Score components and provenance",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/plants/{id}/compare": {
+      "get": {
+        "summary": "Comparison with provider/viewpoint boundary",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/plants/{id}/lifecycle": {
+      "post": {
+        "summary": "Record verified lifecycle outcome",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/views": {
+      "get": {
+        "summary": "Actor-owned saved views",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Save named view",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/views/{id}": {
+      "delete": {
+        "summary": "Remove own view",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/catalog": {
+      "get": {
+        "summary": "Species and structure",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/locations": {
+      "get": {
+        "summary": "Full location aggregates",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Create hierarchy location",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/locations/{id}": {
+      "post": {
+        "summary": "Configure hierarchy and caretaker",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/locations/{id}/floor-plan": {
+      "get": {
+        "summary": "Plan and normalised pins",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "put": {
+        "summary": "Upload a private bounded plan",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/floor-plans/{id}": {
+      "get": {
+        "summary": "Private plan bytes",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/pins": {
+      "post": {
+        "summary": "Version-checked pin position",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/pins/{id}": {
+      "delete": {
+        "summary": "Remove pin",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/team": {
+      "get": {
+        "summary": "Memberships",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Admin-confirmed workspace membership",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/team/operations": {
+      "get": {
+        "summary": "Full assignment and work aggregates",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/analytics": {
+      "get": {
+        "summary": "Range and scope aggregates",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/reports": {
+      "get": {
+        "summary": "Report data and metric definitions",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/issues": {
+      "post": {
+        "summary": "Append operational issue",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/imports": {
+      "get": {
+        "summary": "Owned import batches",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      },
+      "post": {
+        "summary": "Create bounded import batch",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/imports/{id}": {
+      "get": {
+        "summary": "Review import items",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/imports/detect": {
+      "put": {
+        "summary": "Decode own tenant QR identity",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/import-items/{id}": {
+      "post": {
+        "summary": "Revision-checked mapping or observation link",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/observations/sign": {
+      "post": {
+        "summary": "Reserve bounded private upload",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/observations/{id}": {
+      "put": {
+        "summary": "Save observation before analysis",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/upload-receipts/{id}": {
+      "get": {
+        "summary": "Recover actor-owned upload acknowledgement",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags": {
+      "get": {
+        "summary": "Tag inventory and stable URLs",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/{id}/artwork": {
+      "get": {
+        "summary": "Vector artwork for chosen template",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/{id}/preview": {
+      "get": {
+        "summary": "Raster preview from identical artwork",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/sheet": {
+      "get": {
+        "summary": "A4 sheet, maximum 16 tags",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/{id}/lifecycle": {
+      "post": {
+        "summary": "Replace or retire stable identity",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/{id}/programming": {
+      "post": {
+        "summary": "Record client read-back or explicit simulation",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    },
+    "/{org}/tags/programming-history": {
+      "get": {
+        "summary": "Programming history",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "security": [{ "bearerAuth": [] }, { "sessionCookie": [] }],
+        "responses": {
+          "200": { "description": "Authorised result; private, no-store" },
+          "400": { "description": "Validation failure" },
+          "401": { "description": "Sign in again; pending work is retained" },
+          "403": { "description": "Tenant or capability denied" },
+          "409": { "description": "Refresh and review the changed revision or identity" },
+          "429": { "description": "Bounded retry after rate limit" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Care": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "expectedActorId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "plantId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "type": { "type": "string", "enum": ["watered", "fertilised", "inspected", "repotted"] },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "note": { "default": "", "type": "string", "maxLength": 2000 },
+          "amountMl": { "type": "integer", "minimum": 0, "maximum": 100000 },
+          "taskId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "sessionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": ["idempotencyKey", "plantId", "type"]
+      },
+      "StartSession": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "ownerId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "locationId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "plantIds": {
+            "minItems": 1,
+            "maxItems": 200,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        },
+        "required": ["idempotencyKey"]
+      },
+      "FinishSession": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "action": { "type": "string", "enum": ["complete", "cancel"] }
+        },
+        "required": ["idempotencyKey", "revision", "action"]
+      },
+      "CreateTask": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "plantId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["watered", "fertilised", "inspected", "observation", "repotted", "follow_up"]
+          },
+          "title": { "type": "string", "minLength": 1, "maxLength": 180 },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "assigneeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["idempotencyKey", "plantId", "kind", "title", "dueAt"]
+      },
+      "UpdateTask": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed", "cancelled"]
+          },
+          "careEventId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "assigneeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          }
+        },
+        "required": ["idempotencyKey", "revision", "status"]
+      },
+      "BulkFleet": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "plants": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                "revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 }
+              },
+              "required": ["id", "revision"]
+            }
+          },
+          "action": { "type": "string", "enum": ["assign", "move"] },
+          "targetId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": ["idempotencyKey", "plants", "action", "targetId"]
+      },
+      "AlertTransition": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "idempotencyKey": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "revision": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+          "status": {
+            "type": "string",
+            "enum": ["acknowledged", "assigned", "in_progress", "resolved", "reopened"]
+          },
+          "assigneeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              { "type": "null" }
+            ]
+          },
+          "resolutionNote": { "default": "", "type": "string", "maxLength": 2000 }
+        },
+        "required": ["idempotencyKey", "revision", "status"]
+      },
+      "FleetQuery": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "search": { "default": "", "type": "string", "maxLength": 120 },
+          "location": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "assignee": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "state": {
+            "type": "string",
+            "enum": ["healthy", "watch", "attention", "critical", "baseline"]
+          },
+          "lifecycle": {
+            "default": "active",
+            "type": "string",
+            "enum": ["active", "retired", "replaced", "all"]
+          },
+          "overdue": { "type": "boolean" },
+          "inspection": { "type": "boolean" },
+          "sort": {
+            "default": "priority",
+            "type": "string",
+            "enum": [
+              "priority",
+              "name",
+              "code",
+              "score",
+              "location",
+              "last_care",
+              "species",
+              "assignee",
+              "delta",
+              "alerts",
+              "next_care"
+            ]
+          },
+          "noObservationDays": { "type": "integer", "minimum": 1, "maximum": 3650 },
+          "direction": { "default": "desc", "type": "string", "enum": ["asc", "desc"] },
+          "page": { "default": 0, "type": "integer", "minimum": 0, "maximum": 100000 },
+          "limit": { "default": 50, "type": "integer", "minimum": 1, "maximum": 100 }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer" },
+      "sessionCookie": { "type": "apiKey", "in": "cookie", "name": "nabat_session" }
+    }
+  }
+}

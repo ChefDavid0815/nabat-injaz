@@ -5,7 +5,8 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3
 import sharp, { type Metadata } from 'sharp';
 import { put as putBlob, get as getBlob } from '@vercel/blob';
 import { dataRoot, database } from './db';
-import { AppError, authorize } from './security';
+import { AppError, authorize, careRoles } from './security';
+import { attachFieldFact } from '@/domain/operations/care-links';
 import type { Actor } from '@/domain/types';
 
 let secretPromise: Promise<string> | undefined;
@@ -151,7 +152,14 @@ export async function uploadPhoto(
   matchedView: boolean,
   careEventId?: string,
   uploadId?: string,
+  capturedAt?: Date,
 ) {
+  if (
+    capturedAt &&
+    (capturedAt.getTime() > Date.now() + 300000 ||
+      capturedAt.getTime() < Date.now() - 3650 * 86400000)
+  )
+    throw new AppError(400, 'Capture date must be within the last ten years.');
   if (body.length > 10 * 1024 * 1024 || body.length < 32)
     throw new AppError(400, 'Use an image smaller than 10 MB.');
   const db = await database();
@@ -161,7 +169,7 @@ export async function uploadPhoto(
     ])
   ).rows[0];
   if (!plant) throw new AppError(404, 'Plant not found.');
-  await authorize(actor, plant.organisation_id);
+  await authorize(actor, plant.organisation_id, careRoles);
   let metadata: Metadata;
   try {
     metadata = await sharp(body, { limitInputPixels: 40000000 }).metadata();
@@ -194,7 +202,7 @@ export async function uploadPhoto(
     objects.put(original, body, `image/${metadata.format}`),
   ]);
   await db.transaction(async (tx) => {
-    await authorize(actor, plant.organisation_id, undefined, tx);
+    await authorize(actor, plant.organisation_id, careRoles, tx);
     const stillOwned = (
       await tx.query('SELECT id FROM plants WHERE id=$1 AND organisation_id=$2 FOR UPDATE', [
         plantId,
@@ -242,6 +250,20 @@ export async function uploadPhoto(
     await tx.query(
       "INSERT INTO observations(id,organisation_id,plant_id,actor_id,source,photo_id,note) VALUES($1,$2,$3,$4,'photo',$1,$5)",
       [id, plant.organisation_id, plantId, actor.id, note],
+    );
+    if (capturedAt) {
+      await tx.query('UPDATE plant_photos SET captured_at=$2 WHERE id=$1', [id, capturedAt]);
+      await tx.query('UPDATE observations SET captured_at=$2 WHERE id=$1', [id, capturedAt]);
+    }
+    await attachFieldFact(
+      tx,
+      actor,
+      plant.organisation_id,
+      plantId,
+      id,
+      'observation',
+      capturedAt || new Date(),
+      note,
     );
     if (careEventId)
       await tx.query('UPDATE plant_photos SET care_event_id=$2 WHERE id=$1', [id, careEventId]);

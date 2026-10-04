@@ -1,0 +1,6 @@
+{
+  "adapter": "SimulatedNfcAdapter",
+  "encodedAndReadBack": true,
+  "serverAuditSaved": true,
+  "physicalTagWritten": false
+}

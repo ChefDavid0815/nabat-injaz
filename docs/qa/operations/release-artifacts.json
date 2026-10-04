@@ -1,0 +1,51 @@
+{
+  "physicalNfcVerified": false,
+  "publishedX64CloudVerified": true,
+  "artifacts": [
+    {
+      "privateDataAbsent": true,
+      "manifestVersion": "1.1.0.0",
+      "archiveEntries": 542,
+      "file": "NABAT-1.1.0-x64-portable.zip",
+      "nativeXamlResourcesPresent": true,
+      "signaturePresent": false,
+      "architecture": "x64",
+      "sha256": "77565765c7c12a0a2ba0f80a5a69070c4f80e37279b160c51b335a50096c6ece"
+    },
+    {
+      "privateDataAbsent": true,
+      "manifestVersion": "1.1.0.0",
+      "archiveEntries": 544,
+      "file": "NABAT-1.1.0-x64-unsigned.msix",
+      "nativeXamlResourcesPresent": true,
+      "signaturePresent": false,
+      "architecture": "x64",
+      "sha256": "b19a91413fefe1ebeb8aaceb3a44f9692e07dcfc99b03735311eda22f16a5e99"
+    },
+    {
+      "privateDataAbsent": true,
+      "manifestVersion": "1.1.0.0",
+      "archiveEntries": 538,
+      "file": "NABAT-1.1.0-arm64-portable.zip",
+      "nativeXamlResourcesPresent": true,
+      "signaturePresent": false,
+      "architecture": "arm64",
+      "sha256": "51ffbc3e3787aa625659906932a20d38f1dac00fbf7f09ac1aff727f3927b61e"
+    },
+    {
+      "privateDataAbsent": true,
+      "manifestVersion": "1.1.0.0",
+      "archiveEntries": 540,
+      "file": "NABAT-1.1.0-arm64-unsigned.msix",
+      "nativeXamlResourcesPresent": true,
+      "signaturePresent": false,
+      "architecture": "arm64",
+      "sha256": "606e6a64f0366d7db09f1b17382d09c612e9608dc11af0ee0a9ce544ad7051df"
+    }
+  ],
+  "trustedInstallVerified": false,
+  "arm64RuntimeVerified": false,
+  "publishedX64RestartVerified": true,
+  "checkedAt": "2026-10-04T12:06:30.3541770Z",
+  "publishedX64RuntimeVerified": true
+}

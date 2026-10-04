@@ -1,4 +1,4 @@
-export type Role = 'owner' | 'admin' | 'manager' | 'caretaker';
+export type Role = 'owner' | 'admin' | 'manager' | 'caretaker' | 'viewer';
 export type HealthState = 'healthy' | 'watch' | 'attention' | 'critical' | 'baseline';
 export type CareType = 'watered' | 'fertilised' | 'repotted' | 'moved' | 'inspected' | 'assigned';
 export interface Actor {
@@ -113,6 +113,14 @@ export interface Signal {
   evidence: string;
 }
 export type VisionFeatures = Record<SignalName, Signal> & {
+  evidence_regions?: {
+    label: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    confidence: number;
+  }[];
   analysis_confidence: number;
   evidence_summary: string;
   comparable: boolean;

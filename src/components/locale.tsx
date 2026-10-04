@@ -14,6 +14,8 @@ const arabic: Record<string, string> = {
   Analytics: 'التحليلات',
   Settings: 'الإعدادات',
   Home: 'الرئيسية',
+  Today: 'اليوم',
+  Viewer: 'مشاهد',
   Account: 'الحساب',
   Add: 'إضافة',
   'Add plant': 'إضافة نبات',

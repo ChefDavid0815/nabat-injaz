@@ -1,0 +1,10 @@
+{
+  "framework": "WinUI 3 / Windows App SDK 2.5.1",
+  "render": "RenderTargetBitmap of the running application\u0027s XAML tree; OS frame and compositor backdrop excluded",
+  "width": 1521.3333740234375,
+  "height": 1016,
+  "scale": 1.5,
+  "plants": 51,
+  "server": "http://127.0.0.1:3001/",
+  "screens": 16
+}

@@ -184,9 +184,10 @@ export async function agentCompleteObservation(raw: unknown) {
     await tx.query('UPDATE visual_analyses SET comparison=comparison || $2::jsonb WHERE id=$1', [
       id,
       JSON.stringify({
-        yellowingContribution: snapshot.composition.trajectory,
-        confidence: snapshot.confidence,
-        baselineBuilding: snapshot.trend === 'baseline',
+        yellowingContribution: snapshot?.composition.trajectory,
+        confidence: snapshot?.confidence,
+        baselineBuilding: snapshot?.trend === 'baseline',
+        historicalOnly: !snapshot,
       }),
     ]);
     await tx.query(
@@ -200,7 +201,7 @@ export async function agentCompleteObservation(raw: unknown) {
     console.info(
       JSON.stringify({ event: 'workspace-agent.result-saved', jobId: d.job_id, analysisId: id }),
     );
-    return { saved: true, analysis_id: id, score: snapshot.score };
+    return { saved: true, analysis_id: id, score: snapshot?.score ?? null };
   });
 }
 async function fail(tx: SqlClient, d: Dispatch, message: string) {

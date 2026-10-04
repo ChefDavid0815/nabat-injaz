@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-04T11:12:54.208Z",
+  "method": "Direct TLS connection; encrypted data backup and additive release migrations",
+  "neonBranchCreated": false,
+  "productionChanged": true,
+  "encryptedBackup": "data/operations-release-backups/pre-1.1-1791112366103.json.dpapi",
+  "migrations": [
+    "010_operations.sql",
+    "011_operations_transfer_cleanup.sql",
+    "012_operations_workspace.sql",
+    "013_operations_lifecycle.sql"
+  ],
+  "before": {
+    "plants": 1,
+    "photos": 1,
+    "analyses": 0,
+    "scores": 0,
+    "migrations": 9
+  },
+  "after": {
+    "plants": 1,
+    "photos": 1,
+    "analyses": 0,
+    "scores": 0,
+    "migrations": 13
+  },
+  "contract": "operations/1.1",
+  "workspaceReadable": true
+}

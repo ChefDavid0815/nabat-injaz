@@ -1,0 +1,11 @@
+{
+  "origin": "https://nabat-injaz.vercel.app/",
+  "nativeWinUiRunning": true,
+  "nativeBearerSignIn": true,
+  "sharedSnapshotParsed": true,
+  "sqliteCareQueued": true,
+  "reconnectedToCloud": true,
+  "careReceiptAcknowledged": true,
+  "modelCalls": 0,
+  "physicalNfc": false
+}

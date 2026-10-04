@@ -11,6 +11,7 @@ import {
   rateLimit,
   authorize,
   managerRoles,
+  careRoles,
   sessionCookieName,
 } from '@/server/security';
 import * as svc from '@/server/services';
@@ -349,6 +350,7 @@ async function handler(request: Request, context: Context) {
         })
         .parse(await body(request));
       const plant = await svc.getPlant(actor, d.plantId);
+      await authorize(actor, plant.organisation_id, careRoles);
       await rateLimit(`upload:${actor.id}`, 30, 3600);
       const uploadId = randomUUID();
       await (
@@ -440,7 +442,7 @@ async function handler(request: Request, context: Context) {
         )
       ).rows[0];
       if (!job) throw new AppError(404, 'Analysis job not found.');
-      await authorize(actor, job.organisation_id);
+      await authorize(actor, job.organisation_id, careRoles);
       if (job.status !== 'failed')
         throw new AppError(409, 'This analysis is not ready for a retry.');
       await (

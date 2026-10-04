@@ -4,6 +4,9 @@ docs/
 test-results/
 playwright-report/
 node_modules/
+windows/
+.tools/
+.next-operations/
 .env*
 .agents
 *.tsbuildinfo

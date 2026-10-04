@@ -24,6 +24,25 @@ export const visionSchema = z
     analysis_confidence: z.number().min(0).max(1),
     evidence_summary: z.string().min(1).max(1500),
     comparable: z.boolean(),
+    evidence_regions: z
+      .array(
+        z
+          .object({
+            label: z.string().min(1).max(80),
+            x: z.number().min(0).max(1),
+            y: z.number().min(0).max(1),
+            width: z.number().positive().max(1),
+            height: z.number().positive().max(1),
+            confidence: z.number().min(0).max(1),
+          })
+          .strict()
+          .refine(
+            (r) => r.x + r.width <= 1 && r.y + r.height <= 1,
+            'Evidence region must stay inside the image.',
+          ),
+      )
+      .max(25)
+      .optional(),
   })
   .strict();
 const signalJson = {

@@ -26,6 +26,8 @@ import { useLocale } from './locale';
 import { PlantImage, Vitality, Status, TrendChart, Dialog, ErrorMessage } from './ui';
 import { PhotoCapture } from './photo-capture';
 import { api, mutate, dateLabel, dayAge } from '@/lib/client';
+import { saveFieldCare } from '@/lib/field-care';
+import { syncPendingCare } from '@/lib/operations-outbox';
 import type { plantDetails } from '@/server/services';
 import type { Location, CareType, TimelineItem } from '@/domain/types';
 type Detail = Awaited<ReturnType<typeof plantDetails>>;
@@ -63,6 +65,27 @@ export function PlantProfile({
     [lastCare, setLastCare] = useState<string | null>(null),
     [error, setError] = useState<string | null>(null);
   const p = data.plant;
+  useEffect(() => {
+    let active = true;
+    const online = async () => {
+      await syncPendingCare(actor.id + ':' + workspace.id);
+      if (!active) return;
+      try {
+        const latest = await api<Detail>('/api/plants/' + initial.plant.id);
+        if (active) {
+          setData(latest);
+          setOptimistic(null);
+        }
+      } catch {
+        /* Keep the saved local fact until a confirmed refresh. */
+      }
+    };
+    window.addEventListener('online', online);
+    return () => {
+      active = false;
+      window.removeEventListener('online', online);
+    };
+  }, [actor.id, workspace.id, initial.plant.id]);
   const recommendation = p.reasons?.find((reason) => reason.kind === 'care') || p.reasons?.[0];
   const nextCareTitle =
     recommendation?.kind === 'baseline'
@@ -95,6 +118,10 @@ export function PlantProfile({
     };
   }, [processing, initial.plant.id]);
   async function water() {
+    if (workspace.role === 'viewer') {
+      setError('Your role is read only.');
+      return;
+    }
     if (pending) return;
     setPending(true);
     setError(null);
@@ -107,13 +134,25 @@ export function PlantProfile({
       actor: actor.name,
     });
     try {
-      const result = await mutate<{ id: string }>(`/api/plants/${p.id}/care`, {
+      const result = await saveFieldCare(actor.id, workspace.id, p.id, {
         type: 'watered',
         idempotencyKey: key,
       });
-      setLastCare(result.id);
-      toast('Watered. Care saved to the living history.');
-      await refresh();
+      if (result.pending) {
+        setLastCare(null);
+        setOptimistic({
+          id: key,
+          type: 'watered',
+          at: new Date().toISOString(),
+          note: 'Saved on this device · pending sync',
+          actor: actor.name,
+        });
+        toast('Care saved on this device. It will sync when connected.');
+      } else {
+        setLastCare(result.id);
+        toast('Watered. Care saved to the living history.');
+        await refresh();
+      }
     } catch (e) {
       setError((e as Error).message);
       setOptimistic(null);
@@ -137,7 +176,7 @@ export function PlantProfile({
           <ArrowLeft size={18} />
           {t('Plants')}
         </Link>
-        {workspace.role !== 'caretaker' && (
+        {['owner', 'admin', 'manager'].includes(workspace.role) && (
           <button className="button secondary small" onClick={() => setEdit(true)}>
             <Settings size={16} />
             {t('Edit plant')}
@@ -200,7 +239,7 @@ export function PlantProfile({
               {actions.map(([type, label, Icon]) => (
                 <button
                   key={type}
-                  disabled={pending}
+                  disabled={pending || workspace.role === 'viewer'}
                   onClick={() => (type === 'watered' ? water() : setCare(type))}
                 >
                   <Icon size={26} strokeWidth={1.5} aria-hidden="true" />
@@ -522,7 +561,11 @@ export function PlantProfile({
         </section>
       </div>
       <div className="profile-dock" aria-label="Quick plant care">
-        <button className="button" disabled={pending} onClick={water}>
+        <button
+          className="button"
+          disabled={pending || workspace.role === 'viewer'}
+          onClick={water}
+        >
           <Droplets size={21} aria-hidden="true" />
           {pending ? 'Saving…' : t('Watered')}
         </button>
@@ -546,6 +589,11 @@ export function PlantProfile({
           onClose={() => setCare(null)}
           onSaved={async (id, withPhoto) => {
             setCare(null);
+            if (id.startsWith('pending:')) {
+              toast('Care saved on this device. It will sync when connected.');
+              setLastCare(null);
+              return;
+            }
             toast('Care saved.');
             await refresh();
             if (withPhoto) {
@@ -619,7 +667,7 @@ function CareSheet({
   onClose: () => void;
   onSaved: (id: string, photo: boolean) => void;
 }) {
-  const { actor } = useApp(),
+  const { actor, workspace } = useApp(),
     { t } = useLocale();
   const [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null);
@@ -638,7 +686,9 @@ function CareSheet({
       };
       const result = existingId
         ? await mutate(`/api/care/${existingId}`, d, 'PATCH')
-        : await mutate<{ id: string }>(`/api/plants/${plantId}/care`, d);
+        : type === 'moved'
+          ? await mutate<{ id: string }>(`/api/plants/${plantId}/care`, d)
+          : await saveFieldCare(actor.id, workspace.id, plantId, d);
       onSaved(existingId || String(result.id), f.get('photo') === 'on');
     } catch (e) {
       setError((e as Error).message);

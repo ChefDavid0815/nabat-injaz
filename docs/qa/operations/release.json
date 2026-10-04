@@ -1,0 +1,21 @@
+{
+  "newModelCalls": 0,
+  "canonicalOrigin": "https://nabat-injaz.vercel.app",
+  "productionReady": true,
+  "publishedX64Restart": true,
+  "previousProduction": "https://nabat-injaz-118n1g5pk-zzichuan0808-3165s-projects.vercel.app",
+  "arm64Runtime": false,
+  "contract": "operations/1.1",
+  "publishedX64Cloud": true,
+  "version": "1.1.0",
+  "checks": "docs/qa/operations/VERIFICATION.md",
+  "arm64Compiled": true,
+  "deployment": "dpl_GprRJGQekMn1oqpcA8QHjg4MDkE6",
+  "signed": false,
+  "hardwareNfc": false,
+  "publishedX64Runtime": true,
+  "coreTests": 25,
+  "channel": "pilot",
+  "typescriptTests": 67,
+  "e2eTests": 8
+}

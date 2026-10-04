@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { database } from '@/server/db';
-import { authorize, AppError } from '@/server/security';
+import { authorize, AppError, careRoles } from '@/server/security';
+import { attachFieldFact } from '@/domain/operations/care-links';
 import { scorePlant } from '@/server/analysis';
 import type { Actor } from '@/domain/types';
 import { uuid, careSchema } from '@/domain/contracts';
@@ -18,7 +19,7 @@ export async function logCare(actor: Actor, id: string, raw: unknown) {
       id,
       plant.organisation_id,
     ]);
-    await authorize(actor, plant.organisation_id, undefined, tx);
+    await authorize(actor, plant.organisation_id, careRoles, tx);
     const old = (
       await tx.query<{ id: string; plant_id: string; actor_id: string; organisation_id: string }>(
         'SELECT * FROM care_events WHERE idempotency_key=$1',
@@ -79,12 +80,22 @@ export async function logCare(actor: Actor, id: string, raw: unknown) {
     }
     const analysis = (
       await tx.query<{ id: string }>(
-        'SELECT id FROM visual_analyses WHERE plant_id=$1 ORDER BY created_at DESC LIMIT 1',
+        'SELECT a.id FROM visual_analyses a JOIN plant_photos p ON p.id=a.photo_id WHERE a.plant_id=$1 ORDER BY p.captured_at DESC,a.created_at DESC LIMIT 1',
         [id],
       )
     ).rows[0];
     if (analysis) await scorePlant(tx, id, analysis.id);
     await audit(tx, plant.organisation_id, actor.id, `care.${data.type}`, careId, { plantId: id });
+    await attachFieldFact(
+      tx,
+      actor,
+      plant.organisation_id,
+      id,
+      careId,
+      data.type,
+      new Date(),
+      note,
+    );
     return { id: careId, duplicate: false };
   });
 }
@@ -109,7 +120,7 @@ export async function amendCare(actor: Actor, id: string, raw: unknown) {
       }>('SELECT * FROM care_events WHERE id=$1 FOR UPDATE', [id])
     ).rows[0];
     if (!event) throw new AppError(404, 'Care event not found.');
-    await authorize(actor, event.organisation_id, undefined, tx);
+    await authorize(actor, event.organisation_id, careRoles, tx);
     if (event.actor_id !== actor.id || Date.now() - event.occurred_at.getTime() > 10 * 60000)
       throw new AppError(403, 'Only the person who logged care can add details within 10 minutes.');
     await tx.query('UPDATE care_events SET note=$2,amount_ml=$3 WHERE id=$1', [

@@ -8,6 +8,14 @@ import type { VisionFeatures } from '@/domain/types';
 import { reserveGeneration, saveGenerationUsage, finishGeneration } from './gateway-metering';
 
 export async function scorePlant(tx: SqlClient, plantId: string, analysisId: string) {
+  const latestObserved = (
+    await tx.query<{ id: string }>(
+      'SELECT a.id FROM visual_analyses a JOIN plant_photos p ON p.id=a.photo_id WHERE a.plant_id=$1 ORDER BY p.captured_at DESC,a.created_at DESC LIMIT 1',
+      [plantId],
+    )
+  ).rows[0];
+  // Historical imports retain analysis evidence without replacing the current operational score.
+  if (latestObserved?.id !== analysisId) return null;
   const p = (
     await tx.query<{ organisation_id: string; watering_days: number; fertilising_days: number }>(
       'SELECT p.organisation_id,s.watering_days,s.fertilising_days FROM plants p JOIN plant_species s ON s.id=p.species_id WHERE p.id=$1',
@@ -237,9 +245,10 @@ export async function runAnalysisBatch(
           [
             id,
             JSON.stringify({
-              yellowingContribution: snapshot.composition.trajectory,
-              confidence: snapshot.confidence,
-              baselineBuilding: snapshot.trend === 'baseline',
+              yellowingContribution: snapshot?.composition.trajectory,
+              confidence: snapshot?.confidence,
+              baselineBuilding: snapshot?.trend === 'baseline',
+              historicalOnly: !snapshot,
             }),
           ],
         );

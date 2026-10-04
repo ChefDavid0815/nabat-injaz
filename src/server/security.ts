@@ -87,3 +87,4 @@ export function checkOrigin(request: Request) {
 }
 export const managerRoles: Role[] = ['owner', 'admin', 'manager'];
 export const adminRoles: Role[] = ['owner', 'admin'];
+export const careRoles: Role[] = ['owner', 'admin', 'manager', 'caretaker'];

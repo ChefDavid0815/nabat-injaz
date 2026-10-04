@@ -1,0 +1,41 @@
+name: NABAT Operations
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      [
+        'windows/**',
+        'src/domain/operations/**',
+        'src/app/api/v1/**',
+        'src/components/operations/**',
+        'db/migrations/01*.sql',
+        'scripts/operations-contract.ts',
+      ]
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run contract:check
+      - run: npm test
+      - run: npm run build
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix: { arch: [x64, arm64] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '10.0.x' }
+      - run: dotnet test windows/Nabat.Core.Tests/Nabat.Core.Tests.csproj -c Release
+      - shell: pwsh
+        run: ./windows/build.ps1 -Architecture '${{ matrix.arch }}' -Package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nabat-operations-1.1-${{ matrix.arch }}
+          path: windows/artifacts/
