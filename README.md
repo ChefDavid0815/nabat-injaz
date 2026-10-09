@@ -50,7 +50,7 @@ npm run dev:operations
 
 Open **http://127.0.0.1:3001** and choose **Explore the demo**. The script isolates the synthetic local database, storage and analysis provider from cloud credentials. Saved demonstration interactions persist.
 
-The existing native Windows builds are in `windows/artifacts/`. Extract the whole x64 portable folder, not only its EXE. `windows/Start-Nabat.ps1` starts the isolated server and native app; [native build and package instructions](docs/OPERATIONS_RELEASE.md) describe the self-contained x64 / ARM64 folders and unsigned MSIX packages. Public downloadable release assets will be added when the GitHub publication completes.
+Download the verified **[Windows x64 portable pilot](https://github.com/ChefDavid0815/nabat-injaz/releases/tag/v1.1.0)** and compare it with the release checksum. Extract the whole folder, not only its EXE. MSIX and ARM64 packaging instructions remain in the [native build guide](docs/OPERATIONS_RELEASE.md); those packages are not part of this public download.
 
 ## 03 / Care with context
 

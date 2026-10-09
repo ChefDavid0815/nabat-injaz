@@ -50,7 +50,7 @@ npm run dev:operations
 
 打开 **http://127.0.0.1:3001**，选择 **Explore the demo**。脚本把合成数据库、储存与分析提供方和云端凭据隔离；演示中的照护和观察会保存在本机。
 
-原生 Windows 构建位于 `windows/artifacts/`。请完整解压 x64 便携文件夹，不要只复制 EXE。`windows/Start-Nabat.ps1` 会启动隔离演示服务与原生应用；[构建与打包指南](docs/OPERATIONS_RELEASE.md)说明了自包含 x64 / ARM64 文件夹和未签名 MSIX 包。GitHub 发布完成后，再补上公开下载资产。
+下载已核对的 **[Windows x64 便携试点版](https://github.com/ChefDavid0815/nabat-injaz/releases/tag/v1.1.0)**，并与发布页的校验文件比对。请完整解压，不要只复制 EXE。MSIX 与 ARM64 的打包方法保留在[原生构建指南](docs/OPERATIONS_RELEASE.md)中，相关包暂未纳入本次公开下载。
 
 ## 03 / 照护，也要保留来处
 
